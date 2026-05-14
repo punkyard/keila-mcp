@@ -76,6 +76,8 @@ class KeilaClient:
                 f"{response.json().get('error', 'Unknown error')}"
             )
         response.raise_for_status()
+        if not response.content:
+            return {}
         return response.json()
 
     _METHODS = {
@@ -249,7 +251,7 @@ class KeilaClient:
             body["do_not_track"] = do_not_track
 
         logger.info("keila_client.create_campaign", extra={"subject": subject})
-        data = self._post("/campaigns", json_body=body)
+        data = self._post("/campaigns", json_body={"data": body})
         return self._unwrap_response(data)
 
     def get_campaign(self, id: str) -> dict[str, Any]:
@@ -291,7 +293,7 @@ class KeilaClient:
             body["do_not_track"] = do_not_track
 
         logger.info("keila_client.update_campaign", extra={"id": id})
-        data = self._put(f"/campaigns/{id}", json_body=body)
+        data = self._put(f"/campaigns/{id}", json_body={"data": body})
         return self._unwrap_response(data)
 
     def delete_campaign(self, id: str) -> dict[str, Any]:
@@ -333,7 +335,7 @@ class KeilaClient:
             body["data"] = data
 
         logger.info("keila_client.create_contact", extra={"email": email})
-        resp = self._post("/contacts", json_body=body)
+        resp = self._post("/contacts", json_body={"data": body})
         return self._unwrap_response(resp)
 
     def get_contact(self, id: str, id_type: str | None = None) -> dict[str, Any]:
@@ -371,7 +373,7 @@ class KeilaClient:
             params["id_type"] = id_type
 
         logger.info("keila_client.update_contact", extra={"id": id})
-        resp = self._put(f"/contacts/{id}", json_body=body, params=params or None)
+        resp = self._put(f"/contacts/{id}", json_body={"data": body}, params=params or None)
         return self._unwrap_response(resp)
 
     def delete_contact(self, id: str, id_type: str | None = None) -> dict[str, Any]:
@@ -430,7 +432,7 @@ class KeilaClient:
     def create_segment(self, name: str, filter: dict) -> dict[str, Any]:
         body = {"name": name, "filter": filter}
         logger.info("keila_client.create_segment", extra={"name": name})
-        resp = self._post("/segments", json_body=body)
+        resp = self._post("/segments", json_body={"data": body})
         return self._unwrap_response(resp)
 
     def list_segments(self) -> list[dict[str, Any]]:

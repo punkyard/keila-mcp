@@ -1,6 +1,7 @@
 # Keyla MCP
 
 MCP server for [Keila](https://keila.io/) email campaign API.
+https://github.com/punkyard/keila-mcp
 
 ## Setup
 

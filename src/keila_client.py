@@ -386,9 +386,41 @@ class KeilaClient:
         self, page: int = 0, page_size: int = 50, q: str | None = None
     ) -> dict[str, Any]:
         # Keila API /contacts rejects any extra query params with 400 "Unexpected field".
-        # Pagination and search are not supported server-side; we fetch all contacts.
+        # Fetch all contacts, then apply filter and pagination client-side.
         logger.info("keila_client.list_contacts", extra={"page": page, "page_size": page_size, "q": q})
-        return self._get("/contacts")
+        raw = self._get("/contacts")
+        contacts: list[dict] = raw.get("data", [])
+
+        # Client-side substring filter on email, first_name, last_name
+        if q:
+            q_lower = q.lower()
+            contacts = [
+                c for c in contacts
+                if q_lower in (c.get("email") or "").lower()
+                or q_lower in (c.get("first_name") or "").lower()
+                or q_lower in (c.get("last_name") or "").lower()
+            ]
+
+        total_count = len(contacts)
+
+        # Client-side pagination (page is 0-based)
+        start = page * page_size
+        end = start + page_size
+        page_data = contacts[start:end]
+
+        import math
+        page_count = math.ceil(total_count / page_size) if page_size > 0 else 0
+
+        return {
+            "data": page_data,
+            "meta": {
+                "total_count": total_count,
+                "page": page,
+                "page_size": page_size,
+                "page_count": page_count,
+                "server_pagination": False,
+            },
+        }
 
     def list_senders(self) -> list[dict[str, Any]]:
         logger.info("keila_client.list_senders")

@@ -1,7 +1,7 @@
 [project]
 name = "keyla-mcp"
 version = "0.1.0"
-description = "MCP server for Keila API - list campaigns"
+description = "MCP server for Keila API - comprehensive campaign and contact management"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.9.1",

@@ -641,7 +641,7 @@ class TestKeilaClientForms:
         assert result["id"] == "nfrm_abc"
         mock_post.assert_called_once_with(
             "https://your-keila-instance.example.com/api/v1/forms",
-            json={"data": {"name": "test-form"}},
+            json={"data": {"name": "test-form", "settings": {}}},
             timeout=10,
         )
 

@@ -325,8 +325,7 @@ class KeilaClient:
             body["sender_id"] = sender_id
         if fields is not None:
             body["fields"] = [{k: v for k, v in f.items() if v is not None} for f in fields]
-        if settings is not None:
-            body["settings"] = settings
+        body["settings"] = settings if settings is not None else {}
         data = self._post("/forms", json_body={"data": body})
         return self._unwrap_response(data)
 

@@ -264,6 +264,13 @@ class TestCampaignTools:
         assert result["status"] == "scheduled"
         self.mock_client.schedule_campaign.assert_called_once_with(id="mc_1", scheduled_for="2026-06-01T09:00:00Z")
 
+    def test_schedule_campaign_tool_no_sender(self):
+        from src.mcp_server import schedule_campaign_tool
+        self.mock_client.get_campaign.return_value = {"id": "mc_1", "sender_id": None}
+        result = schedule_campaign_tool(id="mc_1", scheduled_for="2026-06-01T09:00:00Z")
+        assert "error" in result
+        assert "no sender" in result["error"].lower()
+
 
 class TestContactTools:
     def setup_method(self):

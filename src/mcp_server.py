@@ -235,10 +235,14 @@ def send_campaign_tool(id: str, sender_id: str | None = None) -> dict:
         return {"error": str(e)}
 
 
-def schedule_campaign_tool(id: str, scheduled_for: str) -> dict:
+def schedule_campaign_tool(id: str, scheduled_for: str, sender_id: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
     try:
+        if sender_id is None:
+            campaign = get_client().get_campaign(id)
+            if not campaign.get("sender_id"):
+                return {"error": "Campaign has no sender configured. Set a sender_id on the campaign or pass sender_id to schedule_campaign."}
         result = get_client().schedule_campaign(id=id, scheduled_for=scheduled_for)
         elapsed = time.time() - start
         logger.info("campaigns.schedule.result", extra={
@@ -605,8 +609,8 @@ def main():
         return send_campaign_tool(id=id, sender_id=sender_id)
 
     @app.tool()
-    def schedule_campaign_tool_wrapper(id: str, scheduled_for: str) -> dict:
-        return schedule_campaign_tool(id=id, scheduled_for=scheduled_for)
+    def schedule_campaign_tool_wrapper(id: str, scheduled_for: str, sender_id: str | None = None) -> dict:
+        return schedule_campaign_tool(id=id, scheduled_for=scheduled_for, sender_id=sender_id)
 
     @app.tool()
     def create_contact_tool_wrapper(

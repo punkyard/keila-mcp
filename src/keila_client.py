@@ -308,10 +308,33 @@ class KeilaClient:
         return self._post(f"/campaigns/{id}/actions/send", json_body=body or None)
 
     def schedule_campaign(self, id: str, scheduled_for: str) -> dict[str, Any]:
-        body = {"scheduled_for": scheduled_for}
         logger.info("keila_client.schedule_campaign", extra={"id": id, "scheduled_for": scheduled_for})
-        data = self._post(f"/campaigns/{id}/actions/schedule", json_body=body)
+        data = self._post(f"/campaigns/{id}/actions/schedule", json_body={"data": {"scheduled_for": scheduled_for}})
         return self._unwrap_response(data)
+
+    def create_form(
+        self,
+        name: str,
+        sender_id: str | None = None,
+        fields: list[dict] | None = None,
+        settings: dict | None = None,
+    ) -> dict[str, Any]:
+        logger.info("keila_client.create_form", extra={"name": name})
+        body: dict[str, Any] = {"name": name}
+        if sender_id is not None:
+            body["sender_id"] = sender_id
+        if fields is not None:
+            body["fields"] = [{k: v for k, v in f.items() if v is not None} for f in fields]
+        if settings is not None:
+            body["settings"] = settings
+        data = self._post("/forms", json_body={"data": body})
+        return self._unwrap_response(data)
+
+    def delete_form(self, id: str) -> dict[str, Any]:
+        logger.info("keila_client.delete_form", extra={"id": id})
+        data = self._delete(f"/forms/{id}")
+        return self._unwrap_response(data)
+
 
     def create_contact(
         self,

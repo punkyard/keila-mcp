@@ -301,11 +301,9 @@ class TestKeilaClientScheduleCampaign:
             result = self.client.schedule_campaign("mc_1", "2026-06-01T09:00:00Z")
 
         assert result["status"] == "scheduled"
-        body = mock_post.call_args[1]["json"]
-        assert body["scheduled_for"] == "2026-06-01T09:00:00Z"
         mock_post.assert_called_once_with(
             "https://your-keila-instance.example.com/api/v1/campaigns/mc_1/actions/schedule",
-            json={"scheduled_for": "2026-06-01T09:00:00Z"},
+            json={"data": {"scheduled_for": "2026-06-01T09:00:00Z"}},
             timeout=10,
         )
 
@@ -636,3 +634,46 @@ class TestKeilaClientForms:
         with patch.object(self.client.session, "get", return_value=mock_resp) as mock_get:
             self.client.get_form("f_1")
         mock_get.assert_called_once_with("https://your-keila-instance.example.com/api/v1/forms/f_1", timeout=10)
+    def test_create_form_minimal(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form"}})
+        with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
+            result = self.client.create_form(name="test-form")
+        assert result["id"] == "nfrm_abc"
+        mock_post.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/forms",
+            json={"data": {"name": "test-form"}},
+            timeout=10,
+        )
+
+    def test_create_form_with_sender(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form", "sender_id": "nms_x"}})
+        with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
+            result = self.client.create_form(name="test-form", sender_id="nms_x")
+        assert result["sender_id"] == "nms_x"
+        body = mock_post.call_args[1]["json"]
+        assert body["data"]["sender_id"] == "nms_x"
+
+    def test_create_form_with_fields_strips_nulls(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form", "fields": [{"field": "email", "required": True}]}})
+        with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
+            self.client.create_form(
+                name="test-form",
+                fields=[{"field": "email", "required": True, "label": None, "placeholder": None}],
+            )
+        body = mock_post.call_args[1]["json"]
+        sent_fields = body["data"]["fields"]
+        assert len(sent_fields) == 1
+        assert "label" not in sent_fields[0]
+        assert "placeholder" not in sent_fields[0]
+        assert sent_fields[0]["field"] == "email"
+
+    def test_delete_form_sends_delete_request(self):
+        mock_resp = make_mock_response(204, None)
+        with patch.object(self.client.session, "delete", return_value=mock_resp) as mock_del:
+            result = self.client.delete_form("nfrm_abc")
+        assert result == {}
+        mock_del.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/forms/nfrm_abc",
+            timeout=10,
+        )
+

@@ -507,6 +507,55 @@ def get_form_tool(id: str) -> dict:
         return {"error": str(e)}
 
 
+def create_form_tool(
+    name: str,
+    sender_id: str | None = None,
+    fields: list | None = None,
+    settings: dict | None = None,
+) -> dict:
+    correlation_id = str(uuid.uuid4())[:8]
+    start = time.time()
+    try:
+        result = get_client().create_form(
+            name=name,
+            sender_id=sender_id,
+            fields=fields,
+            settings=settings,
+        )
+        logger.info("forms.create.result", extra={
+            "correlation_id": correlation_id, "duration_ms": round((time.time() - start) * 1000, 1),
+            "form_id": result.get("id"),
+        })
+        return result
+    except KeilaAuthError as e:
+        return {"error": str(e)}
+    except KeilaRateLimitError as e:
+        return {"error": str(e)}
+    except KeilaApiError as e:
+        return {"error": str(e)}
+
+
+def delete_form_tool(id: str) -> dict:
+    correlation_id = str(uuid.uuid4())[:8]
+    start = time.time()
+    try:
+        result = get_client().delete_form(id)
+        logger.info("forms.delete.result", extra={
+            "correlation_id": correlation_id, "duration_ms": round((time.time() - start) * 1000, 1),
+            "form_id": id,
+        })
+        return {"message": f"Form {id} deleted successfully"}
+    except KeilaNotFoundError as e:
+        return {"error": str(e)}
+    except KeilaAuthError as e:
+        return {"error": str(e)}
+    except KeilaRateLimitError as e:
+        return {"error": str(e)}
+    except KeilaApiError as e:
+        return {"error": str(e)}
+
+
+
 def main():
     from mcp.server.fastmcp import FastMCP
 
@@ -629,6 +678,19 @@ def main():
     @app.tool()
     def get_form_tool_wrapper(id: str) -> dict:
         return get_form_tool(id=id)
+
+    @app.tool()
+    def create_form_tool_wrapper(
+        name: str,
+        sender_id: str | None = None,
+        fields: list | None = None,
+        settings: dict | None = None,
+    ) -> dict:
+        return create_form_tool(name=name, sender_id=sender_id, fields=fields, settings=settings)
+
+    @app.tool()
+    def delete_form_tool_wrapper(id: str) -> dict:
+        return delete_form_tool(id=id)
 
     transport = "stdio"
     if "--http" in sys.argv:

@@ -393,3 +393,23 @@ class TestSupportingTools:
         result = get_form_tool(id="f_1")
         assert result["id"] == "f_1"
         self.mock_client.get_form.assert_called_once_with("f_1")
+    def test_create_form_tool(self):
+        from src.mcp_server import create_form_tool
+        self.mock_client.create_form.return_value = {"id": "nfrm_abc", "name": "test-form"}
+        result = create_form_tool(name="test-form")
+        assert result["id"] == "nfrm_abc"
+        self.mock_client.create_form.assert_called_once_with(
+            name="test-form",
+            sender_id=None,
+            fields=None,
+            settings=None,
+        )
+
+    def test_delete_form_tool(self):
+        from src.mcp_server import delete_form_tool
+        self.mock_client.delete_form.return_value = {}
+        result = delete_form_tool(id="nfrm_abc")
+        assert "message" in result
+        assert "nfrm_abc" in result["message"]
+        self.mock_client.delete_form.assert_called_once_with("nfrm_abc")
+

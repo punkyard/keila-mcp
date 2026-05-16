@@ -654,7 +654,7 @@ class TestKeilaClientForms:
         assert body["data"]["sender_id"] == "nms_x"
 
     def test_create_form_with_fields_strips_nulls(self):
-        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form", "fields": [{"field": "email", "required": True}]}})
+        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form", "fields": [{"field": "email", "required": True, "cast": True}]}})
         with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
             self.client.create_form(
                 name="test-form",
@@ -666,6 +666,23 @@ class TestKeilaClientForms:
         assert "label" not in sent_fields[0]
         assert "placeholder" not in sent_fields[0]
         assert sent_fields[0]["field"] == "email"
+        # cast must default to True so the field renders on the public form page
+        assert sent_fields[0]["cast"] is True
+
+    def test_create_form_fields_cast_default_true(self):
+        """Fields without explicit cast get cast=True defaulted."""
+        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form"}})
+        with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
+            self.client.create_form(
+                name="test-form",
+                fields=[
+                    {"field": "email", "required": True},
+                    {"field": "first_name", "cast": False},  # explicit False preserved
+                ],
+            )
+        sent_fields = mock_post.call_args[1]["json"]["data"]["fields"]
+        assert sent_fields[0]["cast"] is True   # defaulted
+        assert sent_fields[1]["cast"] is False  # explicit False preserved
 
     def test_create_form_defers_welcome_settings(self):
         """welcome_* keys rejected by POST /forms; must be applied via PATCH after create."""

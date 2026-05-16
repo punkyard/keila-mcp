@@ -349,7 +349,12 @@ class KeilaClient:
         if sender_id is not None:
             body["sender_id"] = sender_id
         if fields is not None:
-            body["fields"] = [{k: v for k, v in f.items() if v is not None} for f in fields]
+            # cast must be True for fields to render on the public form page;
+            # omitting or sending null causes a 500. Default to True if not set.
+            body["fields"] = [
+                {k: v for k, v in {**{"cast": True}, **f}.items() if v is not None}
+                for f in fields
+            ]
         body["settings"] = create_settings
         data = self._post("/forms", json_body={"data": body})
         form = self._unwrap_response(data)
@@ -373,7 +378,10 @@ class KeilaClient:
         if sender_id is not None:
             body["sender_id"] = sender_id
         if fields is not None:
-            body["fields"] = [{k: v for k, v in f.items() if v is not None} for f in fields]
+            body["fields"] = [
+                {k: v for k, v in {**{"cast": True}, **f}.items() if v is not None}
+                for f in fields
+            ]
         if settings is not None:
             body["settings"] = settings
         data = self._patch(f"/forms/{id}", json_body={"data": body})

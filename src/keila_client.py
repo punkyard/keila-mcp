@@ -84,6 +84,7 @@ class KeilaClient:
         "GET": lambda s, u, **kw: s.session.get(u, **kw),
         "POST": lambda s, u, **kw: s.session.post(u, **kw),
         "PUT": lambda s, u, **kw: s.session.put(u, **kw),
+        "PATCH": lambda s, u, **kw: s.session.patch(u, **kw),
         "DELETE": lambda s, u, **kw: s.session.delete(u, **kw),
     }
 
@@ -145,6 +146,13 @@ class KeilaClient:
     ) -> dict[str, Any]:
         url = self._build_url(path)
         return self._request_with_retry(url, method="PUT", json_body=json_body, params=params)
+
+    def _patch(
+        self, path: str, json_body: dict[str, Any] | None = None,
+        params: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        url = self._build_url(path)
+        return self._request_with_retry(url, method="PATCH", json_body=json_body, params=params)
 
     def _delete(
         self, path: str, params: dict[str, str] | None = None
@@ -312,6 +320,11 @@ class KeilaClient:
         data = self._post(f"/campaigns/{id}/actions/schedule", json_body={"data": {"scheduled_for": scheduled_for}})
         return self._unwrap_response(data)
 
+    # Keys that the Keila API rejects on POST /forms but accepts on PATCH /forms/:id
+    _FORM_CREATE_BLOCKED_SETTINGS = frozenset(
+        {"welcome_enabled", "welcome_subject", "welcome_markdown_body"}
+    )
+
     def create_form(
         self,
         name: str,
@@ -320,13 +333,50 @@ class KeilaClient:
         settings: dict | None = None,
     ) -> dict[str, Any]:
         logger.info("keila_client.create_form", extra={"name": name})
+        raw_settings: dict = settings if settings is not None else {}
+        # Split settings into create-safe and welcome-only parts
+        deferred_settings = {
+            k: v
+            for k, v in raw_settings.items()
+            if k in self._FORM_CREATE_BLOCKED_SETTINGS
+        }
+        create_settings = {
+            k: v
+            for k, v in raw_settings.items()
+            if k not in self._FORM_CREATE_BLOCKED_SETTINGS
+        }
         body: dict[str, Any] = {"name": name}
         if sender_id is not None:
             body["sender_id"] = sender_id
         if fields is not None:
             body["fields"] = [{k: v for k, v in f.items() if v is not None} for f in fields]
-        body["settings"] = settings if settings is not None else {}
+        body["settings"] = create_settings
         data = self._post("/forms", json_body={"data": body})
+        form = self._unwrap_response(data)
+        # Apply deferred welcome settings via PATCH if needed
+        if deferred_settings:
+            form = self.update_form(form["id"], settings=deferred_settings)
+        return form
+
+    def update_form(
+        self,
+        id: str,
+        name: str | None = None,
+        sender_id: str | None = None,
+        fields: list[dict] | None = None,
+        settings: dict | None = None,
+    ) -> dict[str, Any]:
+        logger.info("keila_client.update_form", extra={"id": id})
+        body: dict[str, Any] = {}
+        if name is not None:
+            body["name"] = name
+        if sender_id is not None:
+            body["sender_id"] = sender_id
+        if fields is not None:
+            body["fields"] = [{k: v for k, v in f.items() if v is not None} for f in fields]
+        if settings is not None:
+            body["settings"] = settings
+        data = self._patch(f"/forms/{id}", json_body={"data": body})
         return self._unwrap_response(data)
 
     def delete_form(self, id: str) -> dict[str, Any]:

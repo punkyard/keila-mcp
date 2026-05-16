@@ -667,6 +667,67 @@ class TestKeilaClientForms:
         assert "placeholder" not in sent_fields[0]
         assert sent_fields[0]["field"] == "email"
 
+    def test_create_form_defers_welcome_settings(self):
+        """welcome_* keys rejected by POST /forms; must be applied via PATCH after create."""
+        create_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form"}})
+        patch_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form", "settings": {"welcome_enabled": True}}})
+        with (
+            patch.object(self.client.session, "post", return_value=create_resp) as mock_post,
+            patch.object(self.client.session, "patch", return_value=patch_resp) as mock_patch,
+        ):
+            result = self.client.create_form(
+                name="test-form",
+                settings={
+                    "intro_text": "Hello",
+                    "welcome_enabled": True,
+                    "welcome_subject": "Welcome!",
+                    "welcome_markdown_body": "# Hi",
+                },
+            )
+        # POST must NOT contain welcome_* keys
+        post_settings = mock_post.call_args[1]["json"]["data"]["settings"]
+        assert "welcome_enabled" not in post_settings
+        assert "welcome_subject" not in post_settings
+        assert "welcome_markdown_body" not in post_settings
+        assert post_settings["intro_text"] == "Hello"
+        # PATCH must contain only welcome_* keys
+        patch_settings = mock_patch.call_args[1]["json"]["data"]["settings"]
+        assert patch_settings["welcome_enabled"] is True
+        assert patch_settings["welcome_subject"] == "Welcome!"
+        assert patch_settings["welcome_markdown_body"] == "# Hi"
+        # Final result is from the PATCH response
+        assert result["settings"]["welcome_enabled"] is True
+
+    def test_create_form_no_welcome_no_patch(self):
+        """No PATCH should be made when welcome_* keys are absent."""
+        create_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "test-form"}})
+        with (
+            patch.object(self.client.session, "post", return_value=create_resp) as mock_post,
+            patch.object(self.client.session, "patch") as mock_patch,
+        ):
+            self.client.create_form(name="test-form", settings={"intro_text": "Hello"})
+        mock_post.assert_called_once()
+        mock_patch.assert_not_called()
+
+    def test_update_form_sends_patch(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "name": "renamed"}})
+        with patch.object(self.client.session, "patch", return_value=mock_resp) as mock_patch:
+            result = self.client.update_form("nfrm_abc", name="renamed")
+        assert result["name"] == "renamed"
+        mock_patch.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/forms/nfrm_abc",
+            json={"data": {"name": "renamed"}},
+            timeout=10,
+        )
+
+    def test_update_form_with_settings(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "nfrm_abc", "settings": {"welcome_enabled": True}}})
+        with patch.object(self.client.session, "patch", return_value=mock_resp) as mock_patch:
+            result = self.client.update_form("nfrm_abc", settings={"welcome_enabled": True})
+        patch_body = mock_patch.call_args[1]["json"]
+        assert patch_body["data"]["settings"]["welcome_enabled"] is True
+        assert result["settings"]["welcome_enabled"] is True
+
     def test_delete_form_sends_delete_request(self):
         mock_resp = make_mock_response(204, None)
         with patch.object(self.client.session, "delete", return_value=mock_resp) as mock_del:

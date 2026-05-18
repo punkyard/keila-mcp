@@ -35,6 +35,35 @@ python src/mcp_server.py --http
 
 ## Tools
 
+| Tool | Description |
+|------|-------------|
+| `list_campaigns` | List all campaigns with optional status/search filter |
+| `create_campaign` | Create a new campaign |
+| `get_campaign` | Get a campaign by ID |
+| `update_campaign` | Update an existing campaign |
+| `delete_campaign` | Delete a campaign |
+| `send_campaign` | Send a campaign immediately |
+| `schedule_campaign` | Schedule a campaign for later delivery |
+| `create_contact` | Create a new contact |
+| `get_contact` | Get a contact by ID |
+| `update_contact` | Update a contact |
+| `delete_contact` | Delete a contact |
+| `list_contacts` | List contacts with optional filtering |
+| `update_contact_data` | Merge custom data fields on a contact |
+| `replace_contact_data` | Replace all custom data fields on a contact |
+| `list_senders` | List all senders |
+| `create_segment` | Create a new segment |
+| `list_segments` | List all segments |
+| `get_segment` | Get a segment by ID |
+| `update_segment` | Update a segment |
+| `delete_segment` | Delete a segment |
+| `list_forms` | List all forms |
+| `get_form` | Get a form by ID |
+| `create_form` | Create a new signup form |
+| `update_form` | Update a form |
+| `delete_form` | Delete a form |
+| `submit_form` | Submit a signup form on behalf of a contact |
+
 ### Campaigns
 
 #### `list_campaigns`

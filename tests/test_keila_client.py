@@ -755,3 +755,127 @@ class TestKeilaClientForms:
             timeout=10,
         )
 
+
+
+class TestKeilaClientUpdateSegment:
+    def setup_method(self):
+        self.client = KeilaClient(base_url="https://your-keila-instance.example.com", api_key="test-key-123")
+
+    def test_update_segment_name_only(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "sg_1", "name": "Renamed"}})
+        with patch.object(self.client.session, "patch", return_value=mock_resp) as mock_patch:
+            result = self.client.update_segment("sg_1", name="Renamed")
+        assert result["name"] == "Renamed"
+        mock_patch.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/segments/sg_1",
+            json={"data": {"name": "Renamed"}},
+            timeout=10,
+        )
+
+    def test_update_segment_filter_only(self):
+        new_filter = {"email": {"$like": "%example.com"}}
+        mock_resp = make_mock_response(200, {"data": {"id": "sg_1", "filter": new_filter}})
+        with patch.object(self.client.session, "patch", return_value=mock_resp) as mock_patch:
+            result = self.client.update_segment("sg_1", filter=new_filter)
+        assert result["filter"] == new_filter
+        mock_patch.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/segments/sg_1",
+            json={"data": {"filter": new_filter}},
+            timeout=10,
+        )
+
+    def test_update_segment_name_and_filter(self):
+        new_filter = {"email": {"$like": "%example.com"}}
+        mock_resp = make_mock_response(200, {"data": {"id": "sg_1", "name": "New", "filter": new_filter}})
+        with patch.object(self.client.session, "patch", return_value=mock_resp) as mock_patch:
+            result = self.client.update_segment("sg_1", name="New", filter=new_filter)
+        body = mock_patch.call_args[1]["json"]
+        assert body["data"]["name"] == "New"
+        assert body["data"]["filter"] == new_filter
+
+    def test_update_segment_no_fields_raises(self):
+        with pytest.raises(ValueError, match="at least one"):
+            self.client.update_segment("sg_1")
+
+
+class TestKeilaClientContactData:
+    def setup_method(self):
+        self.client = KeilaClient(base_url="https://your-keila-instance.example.com", api_key="test-key-123")
+
+    def test_update_contact_data_by_id(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "c_1", "data": {"score": 10}}})
+        with patch.object(self.client.session, "patch", return_value=mock_resp) as mock_patch:
+            result = self.client.update_contact_data("c_1", {"score": 10})
+        assert result["data"]["score"] == 10
+        mock_patch.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/contacts/c_1/data",
+            json={"data": {"score": 10}},
+            timeout=10,
+        )
+
+    def test_update_contact_data_by_email(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "c_1"}})
+        with patch.object(self.client.session, "patch", return_value=mock_resp) as mock_patch:
+            self.client.update_contact_data("user@example.com", {"score": 5}, id_type="email")
+        mock_patch.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/contacts/user@example.com/data",
+            json={"data": {"score": 5}},
+            params={"id_type": "email"},
+            timeout=10,
+        )
+
+    def test_replace_contact_data_by_id(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "c_1", "data": {"score": 99}}})
+        with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
+            result = self.client.replace_contact_data("c_1", {"score": 99})
+        assert result["data"]["score"] == 99
+        mock_post.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/contacts/c_1/data",
+            json={"data": {"score": 99}},
+            timeout=10,
+        )
+
+    def test_replace_contact_data_by_email(self):
+        mock_resp = make_mock_response(200, {"data": {"id": "c_1"}})
+        with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
+            self.client.replace_contact_data("user@example.com", {"score": 1}, id_type="email")
+        mock_post.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/contacts/user@example.com/data",
+            json={"data": {"score": 1}},
+            params={"id_type": "email"},
+            timeout=10,
+        )
+
+
+class TestKeilaClientSubmitForm:
+    def setup_method(self):
+        self.client = KeilaClient(base_url="https://your-keila-instance.example.com", api_key="test-key-123")
+
+    def test_submit_form_success(self):
+        """T002: Submit form returns contact dict on HTTP 200."""
+        contact_response = {"data": {"id": "c_abc", "email": "jane@example.com", "status": "active"}}
+        mock_resp = make_mock_response(200, contact_response)
+        with patch.object(self.client.session, "post", return_value=mock_resp) as mock_post:
+            result = self.client.submit_form("nfrm_1", "jane@example.com")
+        assert result["data"]["email"] == "jane@example.com"
+        mock_post.assert_called_once_with(
+            "https://your-keila-instance.example.com/api/v1/forms/nfrm_1/actions/submit",
+            json={"data": {"email": "jane@example.com"}},
+            timeout=10,
+        )
+
+    def test_submit_form_double_opt_in(self):
+        """T003: Submit form with DOI-enabled form returns double_opt_in_required."""
+        doi_response = {"data": {"double_opt_in_required": True}}
+        mock_resp = make_mock_response(202, doi_response)
+        with patch.object(self.client.session, "post", return_value=mock_resp):
+            result = self.client.submit_form("nfrm_doi", "jane@example.com")
+        assert result["data"]["double_opt_in_required"] is True
+
+    def test_submit_form_not_found(self):
+        """T004: Submit form raises KeilaNotFoundError when form not found (404)."""
+        from src.keila_client import KeilaNotFoundError
+        mock_resp = make_mock_response(404, {"error": "Not found"})
+        with patch.object(self.client.session, "post", return_value=mock_resp):
+            with pytest.raises(KeilaNotFoundError):
+                self.client.submit_form("nfrm_missing", "jane@example.com")

@@ -203,6 +203,16 @@ Delete a segment.
 |-------|------|----------|-------------|
 | `id` | string | Yes | Segment ID |
 
+#### `update_segment`
+
+Update a segment's name and/or filter. At least one of `name` or `filter` must be provided.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Segment ID |
+| `name` | string | No | New segment name |
+| `filter` | object | No | New filter expression |
+
 ### Forms
 
 #### `list_forms`
@@ -218,6 +228,73 @@ Get a form by ID.
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Form ID |
+
+#### `create_form`
+
+Create a new subscription form.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Form name |
+| `sender_id` | string | No | Sender identity ID |
+| `fields` | array | No | Form field definitions |
+| `settings` | object | No | Form settings (double opt-in, redirect URLs, etc.) |
+
+#### `delete_form`
+
+Delete a form.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Form ID |
+
+#### `update_form`
+
+Update an existing signup form.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Form ID |
+| `name` | string | No | New form name |
+| `sender_id` | string | No | New sender identity ID |
+| `fields` | array | No | Replacement field definitions |
+| `settings` | object | No | Updated form settings |
+
+#### `submit_form`
+
+Submit a signup form on behalf of a contact. Returns the created/updated contact on success, or `{"data": {"double_opt_in_required": true}}` if the form has double opt-in enabled.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `form_id` | string | Yes | Form ID |
+| `email` | string | Yes | Contact email address |
+| `first_name` | string | No | Contact first name |
+| `last_name` | string | No | Contact last name |
+| `external_id` | string | No | External identifier |
+| `status` | string | No | Contact status (e.g. `active`) |
+| `data` | object | No | Custom data key/value pairs |
+
+
+
+#### `update_contact_data`
+
+Merge new key/value pairs into a contact's custom data field. Keys not present in `data` are preserved.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
+| `data` | object | Yes | Key/value pairs to merge |
+| `id_type` | string | No | `id` (default), `email`, or `external_id` |
+
+#### `replace_contact_data`
+
+Replace a contact's entire custom data field with the provided dict.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
+| `data` | object | Yes | New data dict (replaces existing) |
+| `id_type` | string | No | `id` (default), `email`, or `external_id` |
 
 ## Development
 

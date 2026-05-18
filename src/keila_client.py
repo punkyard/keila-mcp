@@ -135,10 +135,11 @@ class KeilaClient:
         return self._request_with_retry(url, params=params, method="GET")
 
     def _post(
-        self, path: str, json_body: dict[str, Any] | None = None
+        self, path: str, json_body: dict[str, Any] | None = None,
+        params: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         url = self._build_url(path)
-        return self._request_with_retry(url, method="POST", json_body=json_body)
+        return self._request_with_retry(url, method="POST", json_body=json_body, params=params)
 
     def _put(
         self, path: str, json_body: dict[str, Any] | None = None,
@@ -529,6 +530,36 @@ class KeilaClient:
         logger.info("keila_client.delete_segment", extra={"id": id})
         return self._delete(f"/segments/{id}")
 
+    def update_segment(
+        self, id: str, name: str | None = None, filter: dict | None = None
+    ) -> dict[str, Any]:
+        if name is None and filter is None:
+            raise ValueError("update_segment requires at least one of name or filter")
+        body: dict[str, Any] = {}
+        if name is not None:
+            body["name"] = name
+        if filter is not None:
+            body["filter"] = filter
+        logger.info("keila_client.update_segment", extra={"id": id})
+        resp = self._patch(f"/segments/{id}", json_body={"data": body})
+        return self._unwrap_response(resp)
+
+    def update_contact_data(
+        self, id: str, data: dict[str, Any], id_type: str | None = None
+    ) -> dict[str, Any]:
+        params = {"id_type": id_type} if id_type else None
+        logger.info("keila_client.update_contact_data", extra={"id": id})
+        resp = self._patch(f"/contacts/{id}/data", json_body={"data": data}, params=params)
+        return self._unwrap_response(resp)
+
+    def replace_contact_data(
+        self, id: str, data: dict[str, Any], id_type: str | None = None
+    ) -> dict[str, Any]:
+        params = {"id_type": id_type} if id_type else None
+        logger.info("keila_client.replace_contact_data", extra={"id": id})
+        resp = self._post(f"/contacts/{id}/data", json_body={"data": data}, params=params)
+        return self._unwrap_response(resp)
+
     def list_forms(self) -> list[dict[str, Any]]:
         logger.info("keila_client.list_forms")
         data = self._get("/forms")
@@ -538,3 +569,27 @@ class KeilaClient:
         logger.info("keila_client.get_form", extra={"id": id})
         resp = self._get(f"/forms/{id}")
         return self._unwrap_response(resp)
+
+    def submit_form(
+        self,
+        form_id: str,
+        email: str,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        external_id: str | None = None,
+        status: str | None = None,
+        data: dict | None = None,
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {"email": email}
+        if first_name is not None:
+            body["first_name"] = first_name
+        if last_name is not None:
+            body["last_name"] = last_name
+        if external_id is not None:
+            body["external_id"] = external_id
+        if status is not None:
+            body["status"] = status
+        if data is not None:
+            body["data"] = data
+        logger.info("keila_client.submit_form", extra={"form_id": form_id, "email": email})
+        return self._post(f"/forms/{form_id}/actions/submit", json_body={"data": body})

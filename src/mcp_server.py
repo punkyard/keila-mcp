@@ -560,6 +560,132 @@ def delete_form_tool(id: str) -> dict:
 
 
 
+def update_segment_tool(id: str, name: str | None = None, filter: dict | None = None) -> dict:
+    correlation_id = str(uuid.uuid4())[:8]
+    start = time.time()
+    try:
+        result = get_client().update_segment(id, name=name, filter=filter)
+        logger.info("segments.update.result", extra={
+            "correlation_id": correlation_id, "duration_ms": round((time.time() - start) * 1000, 1),
+            "segment_id": id,
+        })
+        return result
+    except ValueError as e:
+        return {"error": str(e)}
+    except KeilaNotFoundError as e:
+        return {"error": str(e)}
+    except KeilaAuthError as e:
+        return {"error": str(e)}
+    except KeilaRateLimitError as e:
+        return {"error": str(e)}
+    except KeilaApiError as e:
+        return {"error": str(e)}
+
+
+def update_form_tool(
+    id: str,
+    name: str | None = None,
+    sender_id: str | None = None,
+    fields: list | None = None,
+    settings: dict | None = None,
+) -> dict:
+    correlation_id = str(uuid.uuid4())[:8]
+    start = time.time()
+    try:
+        result = get_client().update_form(id, name=name, sender_id=sender_id, fields=fields, settings=settings)
+        logger.info("forms.update.result", extra={
+            "correlation_id": correlation_id, "duration_ms": round((time.time() - start) * 1000, 1),
+            "form_id": id,
+        })
+        return result
+    except KeilaNotFoundError as e:
+        return {"error": str(e)}
+    except KeilaAuthError as e:
+        return {"error": str(e)}
+    except KeilaRateLimitError as e:
+        return {"error": str(e)}
+    except KeilaApiError as e:
+        return {"error": str(e)}
+
+
+def update_contact_data_tool(id: str, data: dict, id_type: str | None = None) -> dict:
+    correlation_id = str(uuid.uuid4())[:8]
+    start = time.time()
+    try:
+        result = get_client().update_contact_data(id, data, id_type=id_type)
+        logger.info("contacts.update_data.result", extra={
+            "correlation_id": correlation_id, "duration_ms": round((time.time() - start) * 1000, 1),
+            "contact_id": id,
+        })
+        return result
+    except KeilaNotFoundError as e:
+        return {"error": str(e)}
+    except KeilaAuthError as e:
+        return {"error": str(e)}
+    except KeilaRateLimitError as e:
+        return {"error": str(e)}
+    except KeilaApiError as e:
+        return {"error": str(e)}
+
+
+def replace_contact_data_tool(id: str, data: dict, id_type: str | None = None) -> dict:
+    correlation_id = str(uuid.uuid4())[:8]
+    start = time.time()
+    try:
+        result = get_client().replace_contact_data(id, data, id_type=id_type)
+        logger.info("contacts.replace_data.result", extra={
+            "correlation_id": correlation_id, "duration_ms": round((time.time() - start) * 1000, 1),
+            "contact_id": id,
+        })
+        return result
+    except KeilaNotFoundError as e:
+        return {"error": str(e)}
+    except KeilaAuthError as e:
+        return {"error": str(e)}
+    except KeilaRateLimitError as e:
+        return {"error": str(e)}
+    except KeilaApiError as e:
+        return {"error": str(e)}
+
+
+def submit_form_tool(
+    form_id: str,
+    email: str,
+    first_name: str | None = None,
+    last_name: str | None = None,
+    external_id: str | None = None,
+    status: str | None = None,
+    data: dict | None = None,
+) -> dict:
+    correlation_id = str(uuid.uuid4())[:8]
+    start = time.time()
+    try:
+        result = get_client().submit_form(
+            form_id=form_id,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            external_id=external_id,
+            status=status,
+            data=data,
+        )
+        logger.info("forms.submit.result", extra={
+            "correlation_id": correlation_id, "duration_ms": round((time.time() - start) * 1000, 1),
+            "form_id": form_id,
+        })
+        return result
+    except KeilaNotFoundError as e:
+        return {"error": str(e)}
+    except KeilaAuthError as e:
+        return {"error": str(e)}
+    except KeilaRateLimitError as e:
+        return {"error": str(e)}
+    except KeilaApiError as e:
+        return {"error": str(e)}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def main():
     from mcp.server.fastmcp import FastMCP
 
@@ -695,6 +821,53 @@ def main():
     @app.tool()
     def delete_form_tool_wrapper(id: str) -> dict:
         return delete_form_tool(id=id)
+
+    @app.tool()
+    def update_segment_tool_wrapper(id: str, name: str | None = None, filter: dict | None = None) -> dict:
+        """Update a segment's name and/or filter. At least one of name or filter must be provided."""
+        return update_segment_tool(id=id, name=name, filter=filter)
+
+    @app.tool()
+    def update_form_tool_wrapper(
+        id: str,
+        name: str | None = None,
+        sender_id: str | None = None,
+        fields: list | None = None,
+        settings: dict | None = None,
+    ) -> dict:
+        """Update an existing signup form."""
+        return update_form_tool(id=id, name=name, sender_id=sender_id, fields=fields, settings=settings)
+
+    @app.tool()
+    def update_contact_data_tool_wrapper(id: str, data: dict, id_type: str | None = None) -> dict:
+        """Merge new key/value pairs into a contact's custom data field. Existing keys not in data are preserved."""
+        return update_contact_data_tool(id=id, data=data, id_type=id_type)
+
+    @app.tool()
+    def replace_contact_data_tool_wrapper(id: str, data: dict, id_type: str | None = None) -> dict:
+        """Replace a contact's entire custom data field with the provided dict."""
+        return replace_contact_data_tool(id=id, data=data, id_type=id_type)
+
+    @app.tool()
+    def submit_form_tool_wrapper(
+        form_id: str,
+        email: str,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        external_id: str | None = None,
+        status: str | None = None,
+        data: dict | None = None,
+    ) -> dict:
+        """Submit a Keila signup form. Returns the created/updated contact on success (HTTP 200), or {"data": {"double_opt_in_required": true}} if double opt-in is enabled (HTTP 202)."""
+        return submit_form_tool(
+            form_id=form_id,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            external_id=external_id,
+            status=status,
+            data=data,
+        )
 
     transport = "stdio"
     if "--http" in sys.argv:

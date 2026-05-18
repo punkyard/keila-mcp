@@ -420,3 +420,77 @@ class TestSupportingTools:
         assert "nfrm_abc" in result["message"]
         self.mock_client.delete_form.assert_called_once_with("nfrm_abc")
 
+
+    def test_update_segment_tool(self):
+        from src.mcp_server import update_segment_tool
+        self.mock_client.update_segment.return_value = {"id": "sg_1", "name": "Renamed"}
+        result = update_segment_tool(id="sg_1", name="Renamed", filter=None)
+        assert result["name"] == "Renamed"
+        self.mock_client.update_segment.assert_called_once_with("sg_1", name="Renamed", filter=None)
+
+    def test_update_segment_tool_no_fields_returns_error(self):
+        from src.mcp_server import update_segment_tool
+        self.mock_client.update_segment.side_effect = ValueError("at least one of name or filter")
+        result = update_segment_tool(id="sg_1", name=None, filter=None)
+        assert "error" in result
+        assert "at least one" in result["error"]
+
+    def test_update_form_tool(self):
+        from src.mcp_server import update_form_tool
+        self.mock_client.update_form.return_value = {"id": "nfrm_abc", "name": "renamed"}
+        result = update_form_tool(id="nfrm_abc", name="renamed", sender_id=None, fields=None, settings=None)
+        assert result["name"] == "renamed"
+        self.mock_client.update_form.assert_called_once_with(
+            "nfrm_abc", name="renamed", sender_id=None, fields=None, settings=None
+        )
+
+    def test_update_contact_data_tool(self):
+        from src.mcp_server import update_contact_data_tool
+        self.mock_client.update_contact_data.return_value = {"id": "c_1", "data": {"score": 10}}
+        result = update_contact_data_tool(id="c_1", data={"score": 10}, id_type=None)
+        assert result["data"]["score"] == 10
+        self.mock_client.update_contact_data.assert_called_once_with("c_1", {"score": 10}, id_type=None)
+
+    def test_replace_contact_data_tool(self):
+        from src.mcp_server import replace_contact_data_tool
+        self.mock_client.replace_contact_data.return_value = {"id": "c_1", "data": {"score": 99}}
+        result = replace_contact_data_tool(id="c_1", data={"score": 99}, id_type=None)
+        assert result["data"]["score"] == 99
+        self.mock_client.replace_contact_data.assert_called_once_with("c_1", {"score": 99}, id_type=None)
+
+    def test_update_contact_data_tool_by_email(self):
+        from src.mcp_server import update_contact_data_tool
+        self.mock_client.update_contact_data.return_value = {"id": "c_1"}
+        update_contact_data_tool(id="user@example.com", data={"score": 5}, id_type="email")
+        self.mock_client.update_contact_data.assert_called_once_with("user@example.com", {"score": 5}, id_type="email")
+
+    def test_submit_form_tool_success(self):
+        """T005: submit_form_tool forwards successful contact response."""
+        from src.mcp_server import submit_form_tool
+        self.mock_client.submit_form.return_value = {"data": {"id": "c_abc", "email": "jane@example.com"}}
+        result = submit_form_tool(form_id="nfrm_1", email="jane@example.com")
+        assert result["data"]["email"] == "jane@example.com"
+        self.mock_client.submit_form.assert_called_once_with(
+            form_id="nfrm_1",
+            email="jane@example.com",
+            first_name=None,
+            last_name=None,
+            external_id=None,
+            status=None,
+            data=None,
+        )
+
+    def test_submit_form_tool_double_opt_in(self):
+        """T006: submit_form_tool forwards DOI response."""
+        from src.mcp_server import submit_form_tool
+        self.mock_client.submit_form.return_value = {"data": {"double_opt_in_required": True}}
+        result = submit_form_tool(form_id="nfrm_doi", email="jane@example.com")
+        assert result["data"]["double_opt_in_required"] is True
+
+    def test_submit_form_tool_error(self):
+        """T007: submit_form_tool returns error dict on exception."""
+        from src.mcp_server import submit_form_tool
+        self.mock_client.submit_form.side_effect = Exception("Form not found")
+        result = submit_form_tool(form_id="nfrm_missing", email="jane@example.com")
+        assert "error" in result
+        assert "Form not found" in result["error"]

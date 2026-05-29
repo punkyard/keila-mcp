@@ -1,7 +1,6 @@
 # Keyla MCP
 
-MCP server for [Keila](https://keila.io/) email campaign API.
-https://github.com/punkyard/keila-mcp
+MCP server for [Keila](https://github.com/pentacent/keila) email campaign API.
 
 ## Setup
 
@@ -331,3 +330,13 @@ Replace a contact's entire custom data field with the provided dict.
 pip install -e ".[dev]"
 pytest tests/ -v
 ```
+
+---
+
+<div align="center">
+
+© 2026 [punkyard](https://github.com/punkyard) — [AGPL-3.0](LICENSE)
+
+made with ⏳ by punkyard
+
+</div>

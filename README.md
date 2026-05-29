@@ -1,43 +1,89 @@
-# Keyla MCP
+# **Keila MCP**
 
-MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments, forms, and senders.
+MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments and forms.
 
-## Requirements
-
-- Python 3.10+
-- A running [Keila](https://github.com/pentacent/keila) instance
-- A Keila API key (Settings → API Keys → Create)
-
-## Installation
-
-```bash
-git clone https://github.com/punkyard/keila-mcp.git
-cd keila-mcp/repo
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install .
-```
-
-Find the absolute path to your Python interpreter — you'll need it for client config:
-
-```bash
-which python   # or: .venv/bin/python
-```
-
-## Client Setup
-
-Every MCP client needs two things: the path to the Python interpreter and two environment variables.
-
-| Variable | Value |
-|----------|-------|
-| `KEILA_URL` | Your Keila instance URL, e.g. `https://newsletter.example.com` |
-| `KEILA_API_KEY` | Your Keila API key |
-
-Replace `/absolute/path/to/keila-mcp/repo` with the actual path on your machine in all examples below.
+  
 
 ---
 
-### Claude Desktop
+## **Requirements**
+
+- A running [Keila](https://www.keila.io/docs) instance — [self-host with Docker](https://www.keila.io/docs/self-hosting) or use [Keila Cloud](https://app.keila.io)
+- A Keila API key — Settings → API Keys → Create
+- Python 3.10+ on your machine
+
+  
+
+---
+
+## **Installation**
+
+Choose where to install:
+
+- **Global** — use Keila MCP in any project: install in `~/.mcp/`
+- **Project** — use it only in one project: install in your project folder, e.g. `~/Developer/my-project/.mcp/`
+
+### **macOS / Linux**
+
+```bash
+# global
+mkdir -p ~/.mcp && cd ~/.mcp
+
+# or project-specific
+mkdir -p ~/Developer/my-project/.mcp && cd ~/Developer/my-project/.mcp
+
+git clone https://github.com/punkyard/keila-mcp.git keila-mcp
+cd keila-mcp/repo
+python -m venv .venv
+source .venv/bin/activate
+pip install .
+pwd
+```
+
+Copy the path printed by `pwd` — you will paste it into your client config below.
+
+### **Windows**
+
+```bash
+# global
+mkdir %USERPROFILE%\.mcp && cd %USERPROFILE%\.mcp
+
+# or project-specific
+mkdir C:\Users\your-username\Developer\my-project\.mcp && cd C:\Users\your-username\Developer\my-project\.mcp
+
+git clone https://github.com/punkyard/keila-mcp.git keila-mcp
+cd keila-mcp\repo
+python -m venv .venv
+.venv\Scripts\activate
+pip install .
+cd
+```
+
+Copy the path printed by `cd` — you will paste it into your client config below.
+
+  
+
+---
+
+## **Client Setup**
+
+Every MCP client needs two things: the path to the Python interpreter and two environment variables.
+
+| Variable        | Value                                                          |
+|-----------------|----------------------------------------------------------------|
+| `KEILA_URL`     | Your Keila instance URL, e.g. `https://keila.mydomain.com` |
+| `KEILA_API_KEY` | Create a Keila API key per project                             |
+
+  
+
+![Keila API Keys](assets/keila-create-api-key.png)
+
+  
+
+> [!NOTE]
+> In all examples below, replace `/path/to/keila-mcp/repo` with the path printed by `pwd` (or `cd` on Windows) at the end of the installation section.
+
+### **Claude Desktop**
 
 **File** (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`  
 **File** (Windows): `%APPDATA%\Claude\claude_desktop_config.json`
@@ -46,8 +92,8 @@ Replace `/absolute/path/to/keila-mcp/repo` with the actual path on your machine 
 {
   "mcpServers": {
     "keila": {
-      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
-      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "command": "/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/path/to/keila-mcp/repo/src/mcp_server.py"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "your-api-key"
@@ -59,15 +105,13 @@ Replace `/absolute/path/to/keila-mcp/repo` with the actual path on your machine 
 
 Fully quit and relaunch Claude Desktop after saving.
 
----
-
-### Claude Code
+### **Claude Code**
 
 ```bash
 claude mcp add-json keila '{
   "type": "stdio",
-  "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
-  "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+  "command": "/path/to/keila-mcp/repo/.venv/bin/python",
+  "args": ["/path/to/keila-mcp/repo/src/mcp_server.py"],
   "env": {
     "KEILA_URL": "https://your-keila-instance.com",
     "KEILA_API_KEY": "your-api-key"
@@ -77,9 +121,29 @@ claude mcp add-json keila '{
 
 Add `--scope global` to make it available in all projects.
 
----
+### **Cursor · Cline / Roo Code · Windsurf · OpenClaw**
 
-### VS Code (GitHub Copilot Agent Mode)
+- **Cursor**: `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` for global
+- **Cline / Roo Code**: MCP Servers config via the sidebar
+- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+- **OpenClaw**: `~/.openclaw/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "keila": {
+      "command": "/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+### **VS Code (GitHub Copilot Agent Mode)**
 
 Create `.vscode/mcp.json` in your project:
 
@@ -87,8 +151,8 @@ Create `.vscode/mcp.json` in your project:
 {
   "servers": {
     "keila": {
-      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
-      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "command": "/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/path/to/keila-mcp/repo/src/mcp_server.py"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "${input:keilaApiKey}"
@@ -108,30 +172,7 @@ Create `.vscode/mcp.json` in your project:
 
 Requires Copilot Chat in Agent mode. VS Code will prompt for the API key on first use.
 
----
-
-### Cursor
-
-Create `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` for global):
-
-```json
-{
-  "mcpServers": {
-    "keila": {
-      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
-      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
-      "env": {
-        "KEILA_URL": "https://your-keila-instance.com",
-        "KEILA_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
-
----
-
-### Zed
+### **Zed**
 
 In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
 
@@ -139,8 +180,8 @@ In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
 {
   "context_servers": {
     "keila": {
-      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
-      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "command": "/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/path/to/keila-mcp/repo/src/mcp_server.py"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "your-api-key"
@@ -150,18 +191,16 @@ In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
 }
 ```
 
----
+### **OpenCode**
 
-### Cline / Roo Code (VS Code extensions)
-
-Open the MCP Servers config via the sidebar and add:
+In `~/.config/opencode/opencode.json` (global) or `opencode.json` (project):
 
 ```json
 {
-  "mcpServers": {
+  "mcp": {
     "keila": {
-      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
-      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "type": "local",
+      "command": ["/path/to/keila-mcp/repo/.venv/bin/python", "/path/to/keila-mcp/repo/src/mcp_server.py"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "your-api-key"
@@ -171,37 +210,47 @@ Open the MCP Servers config via the sidebar and add:
 }
 ```
 
----
+### **Pi Agent**
 
-### Windsurf
-
-**File**: `~/.codeium/windsurf/mcp_config.json`
+In `~/.pi/agent/mcp.json`:
 
 ```json
 {
-  "mcpServers": {
-    "keila": {
-      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
-      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
-      "env": {
-        "KEILA_URL": "https://your-keila-instance.com",
-        "KEILA_API_KEY": "your-api-key"
-      }
-    }
+  "keila": {
+    "command": "/path/to/keila-mcp/repo/.venv/bin/python",
+    "args": ["/path/to/keila-mcp/repo/src/mcp_server.py"],
+    "env": {
+      "KEILA_URL": "https://your-keila-instance.com",
+      "KEILA_API_KEY": "your-api-key"
+    },
+    "lifecycle": "on-demand"
   }
 }
 ```
 
----
+### **Hermes**
 
-### OpenAI Codex CLI
+In `~/.hermes/config.yaml`:
+
+```yaml
+mcp_servers:
+  keila:
+    command: /path/to/keila-mcp/repo/.venv/bin/python
+    args:
+      - /path/to/keila-mcp/repo/src/mcp_server.py
+    env:
+      KEILA_URL: https://your-keila-instance.com
+      KEILA_API_KEY: your-api-key
+```
+
+### **OpenAI Codex CLI**
 
 **File**: `~/.codex/config.toml` (global) or `.codex/config.toml` (project):
 
 ```toml
 [mcp_servers.keila]
-command = "/absolute/path/to/keila-mcp/repo/.venv/bin/python"
-args = ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"]
+command = "/path/to/keila-mcp/repo/.venv/bin/python"
+args = ["/path/to/keila-mcp/repo/src/mcp_server.py"]
 
 [mcp_servers.keila.env]
 KEILA_URL = "https://your-keila-instance.com"
@@ -210,7 +259,7 @@ KEILA_API_KEY = "your-api-key"
 
 ---
 
-## Running manually (for testing)
+## **Running manually (for testing)**
 
 ```bash
 # stdio mode (default)
@@ -221,38 +270,40 @@ python src/mcp_server.py --http
 # optional: export KEYLA_MCP_HTTP_PORT=8325
 ```
 
-## Tools
+---
+
+## **Tools**
 
 | Tool | Description |
 |------|-------------|
-| `list_campaigns` | List all campaigns with optional status/search filter |
-| `create_campaign` | Create a new campaign |
-| `get_campaign` | Get a campaign by ID |
-| `update_campaign` | Update an existing campaign |
-| `delete_campaign` | Delete a campaign |
-| `send_campaign` | Send a campaign immediately |
-| `schedule_campaign` | Schedule a campaign for later delivery |
-| `create_contact` | Create a new contact |
-| `get_contact` | Get a contact by ID |
-| `update_contact` | Update a contact |
-| `delete_contact` | Delete a contact |
-| `list_contacts` | List contacts with optional filtering |
-| `update_contact_data` | Merge custom data fields on a contact |
+| `list_campaigns`       | List all campaigns with optional status/search filter |
+| `create_campaign`      | Create a new campaign |
+| `get_campaign`         | Get a campaign by ID |
+| `update_campaign`      | Update an existing campaign |
+| `delete_campaign`      | Delete a campaign |
+| `send_campaign`        | Send a campaign immediately |
+| `schedule_campaign`    | Schedule a campaign for later delivery |
+| `create_contact`       | Create a new contact |
+| `get_contact`          | Get a contact by ID |
+| `update_contact`       | Update a contact |
+| `delete_contact`       | Delete a contact |
+| `list_contacts`        | List contacts with optional filtering |
+| `update_contact_data`  | Merge custom data fields on a contact |
 | `replace_contact_data` | Replace all custom data fields on a contact |
-| `list_senders` | List all senders |
-| `create_segment` | Create a new segment |
-| `list_segments` | List all segments |
-| `get_segment` | Get a segment by ID |
-| `update_segment` | Update a segment |
-| `delete_segment` | Delete a segment |
-| `list_forms` | List all forms |
-| `get_form` | Get a form by ID |
-| `create_form` | Create a new signup form |
-| `update_form` | Update a form |
-| `delete_form` | Delete a form |
-| `submit_form` | Submit a signup form on behalf of a contact |
+| `list_senders`         | List all senders |
+| `create_segment`       | Create a new segment |
+| `list_segments`        | List all segments |
+| `get_segment`          | Get a segment by ID |
+| `update_segment`       | Update a segment |
+| `delete_segment`       | Delete a segment |
+| `list_forms`           | List all forms |
+| `get_form`             | Get a form by ID |
+| `create_form`          | Create a new signup form |
+| `update_form`          | Update a form |
+| `delete_form`          | Delete a form |
+| `submit_form`          | Submit a signup form on behalf of a contact |
 
-### Campaigns
+### **Campaigns**
 
 #### `list_campaigns`
 
@@ -322,7 +373,7 @@ Schedule a campaign for later delivery.
 | `id` | string | Yes | Campaign ID |
 | `scheduled_for` | string | Yes | ISO 8601 datetime (e.g. 2026-06-01T09:00:00Z) |
 
-### Contacts
+### **Contacts**
 
 #### `create_contact`
 
@@ -379,7 +430,7 @@ List contacts with pagination and optional search.
 | `page_size` | integer | No | Results per page (default: 50) |
 | `q` | string | No | Search query |
 
-### Senders
+### **Senders**
 
 #### `list_senders`
 
@@ -387,7 +438,29 @@ List all sender identities.
 
 No parameters.
 
-### Segments
+### **Contact Data**
+
+#### `update_contact_data`
+
+Merge new key/value pairs into a contact's custom data field. Keys not present in `data` are preserved.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
+| `data` | object | Yes | Key/value pairs to merge |
+| `id_type` | string | No | `id` (default), `email`, or `external_id` |
+
+#### `replace_contact_data`
+
+Replace a contact's entire custom data field with the provided dict.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
+| `data` | object | Yes | New data dict (replaces existing) |
+| `id_type` | string | No | `id` (default), `email`, or `external_id` |
+
+### **Segments**
 
 #### `create_segment`
 
@@ -430,7 +503,7 @@ Update a segment's name and/or filter. At least one of `name` or `filter` must b
 | `name` | string | No | New segment name |
 | `filter` | object | No | New filter expression |
 
-### Forms
+### **Forms**
 
 #### `list_forms`
 
@@ -491,38 +564,19 @@ Submit a signup form on behalf of a contact. Returns the created/updated contact
 | `status` | string | No | Contact status (e.g. `active`) |
 | `data` | object | No | Custom data key/value pairs |
 
+---
 
-
-#### `update_contact_data`
-
-Merge new key/value pairs into a contact's custom data field. Keys not present in `data` are preserved.
-
-| Param | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
-| `data` | object | Yes | Key/value pairs to merge |
-| `id_type` | string | No | `id` (default), `email`, or `external_id` |
-
-#### `replace_contact_data`
-
-Replace a contact's entire custom data field with the provided dict.
-
-| Param | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
-| `data` | object | Yes | New data dict (replaces existing) |
-| `id_type` | string | No | `id` (default), `email`, or `external_id` |
-
-## Development
+## **Development**
 
 ```bash
 pip install -e ".[dev]"
 pytest tests/ -v
 ```
 
----
+  
 
 <div align="center">
+_______
 
 © 2026 — [LICENSE AGPL-3.0](LICENSE)
 

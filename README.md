@@ -80,7 +80,7 @@ Every MCP client needs two things: the path to the Python interpreter and two en
 
   
 
-> [!NOTE]
+> [!IMPORTANT]
 > In all examples below, replace `/path/to/keila-mcp/repo` with the path printed by `pwd` (or `cd` on Windows) at the end of the installation section.
 
 ### **Claude Desktop**
@@ -257,6 +257,8 @@ KEILA_URL = "https://your-keila-instance.com"
 KEILA_API_KEY = "your-api-key"
 ```
 
+  
+
 ---
 
 ## **Running manually (for testing)**
@@ -269,6 +271,8 @@ python src/mcp_server.py
 python src/mcp_server.py --http
 # optional: export KEYLA_MCP_HTTP_PORT=8325
 ```
+
+  
 
 ---
 
@@ -564,6 +568,8 @@ Submit a signup form on behalf of a contact. Returns the created/updated contact
 | `status` | string | No | Contact status (e.g. `active`) |
 | `data` | object | No | Custom data key/value pairs |
 
+  
+
 ---
 
 ## **Development**
@@ -577,6 +583,7 @@ pytest tests/ -v
 
 <div align="center">
 _______
+
 
 © 2026 — [LICENSE AGPL-3.0](LICENSE)
 

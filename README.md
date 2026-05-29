@@ -1,35 +1,224 @@
 # Keyla MCP
 
-MCP server for [Keila](https://github.com/pentacent/keila) email campaign API.
+MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments, forms, and senders.
 
-## Setup
+## Requirements
+
+- Python 3.10+
+- A running [Keila](https://github.com/pentacent/keila) instance
+- A Keila API key (Settings → API Keys → Create)
+
+## Installation
 
 ```bash
+git clone https://github.com/punkyard/keila-mcp.git
+cd keila-mcp/repo
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install .
 ```
 
-## Configuration
+Find the absolute path to your Python interpreter — you'll need it for client config:
 
 ```bash
-export KEILA_URL="https://your-keila-instance.com"
-export KEILA_API_KEY="your-api-key"
-export KEYLA_MCP_HTTP_PORT=8325  # optional, default stdio
+which python   # or: .venv/bin/python
 ```
 
-## Usage
+## Client Setup
 
-### Stdio (default, for MCP clients)
+Every MCP client needs two things: the path to the Python interpreter and two environment variables.
+
+| Variable | Value |
+|----------|-------|
+| `KEILA_URL` | Your Keila instance URL, e.g. `https://newsletter.example.com` |
+| `KEILA_API_KEY` | Your Keila API key |
+
+Replace `/absolute/path/to/keila-mcp/repo` with the actual path on your machine in all examples below.
+
+---
+
+### Claude Desktop
+
+**File** (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**File** (Windows): `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "keila": {
+      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+Fully quit and relaunch Claude Desktop after saving.
+
+---
+
+### Claude Code
 
 ```bash
+claude mcp add-json keila '{
+  "type": "stdio",
+  "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
+  "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+  "env": {
+    "KEILA_URL": "https://your-keila-instance.com",
+    "KEILA_API_KEY": "your-api-key"
+  }
+}'
+```
+
+Add `--scope global` to make it available in all projects.
+
+---
+
+### VS Code (GitHub Copilot Agent Mode)
+
+Create `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "keila": {
+      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "${input:keilaApiKey}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "keilaApiKey",
+      "type": "promptString",
+      "description": "Keila API Key",
+      "password": true
+    }
+  ]
+}
+```
+
+Requires Copilot Chat in Agent mode. VS Code will prompt for the API key on first use.
+
+---
+
+### Cursor
+
+Create `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` for global):
+
+```json
+{
+  "mcpServers": {
+    "keila": {
+      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Zed
+
+In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
+
+```json
+{
+  "context_servers": {
+    "keila": {
+      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Cline / Roo Code (VS Code extensions)
+
+Open the MCP Servers config via the sidebar and add:
+
+```json
+{
+  "mcpServers": {
+    "keila": {
+      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Windsurf
+
+**File**: `~/.codeium/windsurf/mcp_config.json`
+
+```json
+{
+  "mcpServers": {
+    "keila": {
+      "command": "/absolute/path/to/keila-mcp/repo/.venv/bin/python",
+      "args": ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+---
+
+### OpenAI Codex CLI
+
+**File**: `~/.codex/config.toml` (global) or `.codex/config.toml` (project):
+
+```toml
+[mcp_servers.keila]
+command = "/absolute/path/to/keila-mcp/repo/.venv/bin/python"
+args = ["/absolute/path/to/keila-mcp/repo/src/mcp_server.py"]
+
+[mcp_servers.keila.env]
+KEILA_URL = "https://your-keila-instance.com"
+KEILA_API_KEY = "your-api-key"
+```
+
+---
+
+## Running manually (for testing)
+
+```bash
+# stdio mode (default)
 python src/mcp_server.py
-```
 
-### HTTP (for testing)
-
-```bash
+# HTTP mode
 python src/mcp_server.py --http
+# optional: export KEYLA_MCP_HTTP_PORT=8325
 ```
 
 ## Tools
@@ -335,8 +524,8 @@ pytest tests/ -v
 
 <div align="center">
 
-© 2026 [punkyard](https://github.com/punkyard) — [AGPL-3.0](LICENSE)
+© 2026 — [LICENSE AGPL-3.0](LICENSE)
 
-made with ⏳ by punkyard
+made with ⏳ by [punkyard](https://github.com/punkyard)
 
 </div>

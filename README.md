@@ -73,10 +73,11 @@ Every MCP client needs two things: the path to the Python interpreter and two en
 |-----------------|----------------------------------------------------------------|
 | `KEILA_URL`     | Your Keila instance URL, e.g. `https://keila.mydomain.com` |
 | `KEILA_API_KEY` | Create a Keila API key per project                             |
+| `KEILA_MCP_HTTP_PORT` | *(optional)* HTTP port for the MCP server. Default: `3001`  |
 
   
 
-![Keila API Keys](assets/keila-create-api-key.png)
+![Keila API Keys](docs/img/keila-create-api-key.png)
 
   
 

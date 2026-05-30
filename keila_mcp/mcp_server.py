@@ -4,7 +4,7 @@ import sys
 import time
 import uuid
 
-from src.keila_client import (
+from keila_mcp.keila_client import (
     KeilaAuthError,
     KeilaApiError,
     KeilaClient,
@@ -13,7 +13,7 @@ from src.keila_client import (
     KeilaValidationError,
 )
 
-logger = logging.getLogger("keyla-mcp")
+logger = logging.getLogger("keila-mcp")
 
 VALID_STATUSES = {"draft", "scheduled", "sent", "archived", "paused"}
 _client: KeilaClient | None = None
@@ -689,7 +689,7 @@ def submit_form_tool(
 def main():
     from mcp.server.fastmcp import FastMCP
 
-    app = FastMCP("keyla-mcp", description="MCP server for Keila API")
+    app = FastMCP("keila-mcp", description="MCP server for Keila API")
 
     @app.tool()
     def list_campaigns_tool(

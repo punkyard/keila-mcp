@@ -2,7 +2,7 @@ import json
 import pytest
 from unittest.mock import Mock, patch
 
-from src.keila_client import KeilaClient, KeilaAuthError, KeilaNotFoundError, KeilaRateLimitError, KeilaApiError, KeilaValidationError
+from keila_mcp.keila_client import KeilaClient, KeilaAuthError, KeilaNotFoundError, KeilaRateLimitError, KeilaApiError, KeilaValidationError
 
 
 def make_mock_response(status_code=200, json_data=None, headers=None, empty_body=False):
@@ -874,7 +874,7 @@ class TestKeilaClientSubmitForm:
 
     def test_submit_form_not_found(self):
         """T004: Submit form raises KeilaNotFoundError when form not found (404)."""
-        from src.keila_client import KeilaNotFoundError
+        from keila_mcp.keila_client import KeilaNotFoundError
         mock_resp = make_mock_response(404, {"error": "Not found"})
         with patch.object(self.client.session, "post", return_value=mock_resp):
             with pytest.raises(KeilaNotFoundError):

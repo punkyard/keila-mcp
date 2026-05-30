@@ -4,7 +4,7 @@ from typing import Any
 
 import requests
 
-logger = logging.getLogger("keyla-mcp")
+logger = logging.getLogger("keila-mcp")
 
 
 class KeilaError(Exception):

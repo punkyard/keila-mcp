@@ -1,11 +1,13 @@
 # **Keila MCP**
 
-MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments and forms.
+> MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments and forms.
 
   
 
 ---
-
+ 
+  
+ 
 ## **Requirements**
 
 - A running [Keila](https://www.keila.io/docs) instance — [self-host with Docker](https://www.keila.io/docs/self-hosting) or use [Keila Cloud](https://app.keila.io)
@@ -15,16 +17,22 @@ MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-com
   
 
 ---
-
+ 
+  
+ 
 ## **Installation**
-
+ 
 Choose where to install:
 
 - **Global** — use Keila MCP in any project: install in `~/.mcp/`
 - **Project** — use it only in one project: install in your project folder, e.g. `~/Developer/my-project/.mcp/`
-
+ 
+  
+ 
 ### **macOS / Linux**
-
+ 
+  
+ 
 ```bash
 # global
 mkdir -p ~/.mcp && cd ~/.mcp
@@ -41,9 +49,13 @@ pwd
 ```
 
 Copy the path printed by `pwd` — you will paste it into your client config below.
-
+ 
+  
+ 
 ### **Windows**
-
+ 
+  
+ 
 ```bash
 # global
 mkdir %USERPROFILE%\.mcp && cd %USERPROFILE%\.mcp
@@ -64,9 +76,13 @@ Copy the path printed by `cd` — you will paste it into your client config belo
   
 
 ---
-
+ 
+  
+ 
 ## **Client Setup**
-
+ 
+  
+ 
 Every MCP client needs two things: the path to the Python interpreter and two environment variables.
 
 | Variable        | Value                                                          |
@@ -83,9 +99,13 @@ Every MCP client needs two things: the path to the Python interpreter and two en
 
 > [!IMPORTANT]
 > In all examples below, replace `/path/to/keila-mcp/repo` with the path printed by `pwd` (or `cd` on Windows) at the end of the installation section.
-
+ 
+  
+ 
 ### **Claude Desktop**
-
+ 
+  
+ 
 **File** (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`  
 **File** (Windows): `%APPDATA%\Claude\claude_desktop_config.json`
 
@@ -105,9 +125,13 @@ Every MCP client needs two things: the path to the Python interpreter and two en
 ```
 
 Fully quit and relaunch Claude Desktop after saving.
-
+ 
+  
+ 
 ### **Claude Code**
-
+ 
+  
+ 
 ```bash
 claude mcp add-json keila '{
   "type": "stdio",
@@ -121,9 +145,13 @@ claude mcp add-json keila '{
 ```
 
 Add `--scope global` to make it available in all projects.
-
+ 
+  
+ 
 ### **Cursor · Cline / Roo Code · Windsurf · OpenClaw**
-
+ 
+  
+ 
 - **Cursor**: `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` for global
 - **Cline / Roo Code**: MCP Servers config via the sidebar
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
@@ -143,9 +171,13 @@ Add `--scope global` to make it available in all projects.
   }
 }
 ```
-
+ 
+  
+ 
 ### **VS Code (GitHub Copilot Agent Mode)**
-
+ 
+  
+ 
 Create `.vscode/mcp.json` in your project:
 
 ```json
@@ -172,9 +204,13 @@ Create `.vscode/mcp.json` in your project:
 ```
 
 Requires Copilot Chat in Agent mode. VS Code will prompt for the API key on first use.
-
+ 
+  
+ 
 ### **Zed**
-
+ 
+  
+ 
 In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
 
 ```json
@@ -191,9 +227,13 @@ In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
   }
 }
 ```
-
+ 
+  
+ 
 ### **OpenCode**
-
+ 
+  
+ 
 In `~/.config/opencode/opencode.json` (global) or `opencode.json` (project):
 
 ```json
@@ -210,9 +250,13 @@ In `~/.config/opencode/opencode.json` (global) or `opencode.json` (project):
   }
 }
 ```
-
+ 
+  
+ 
 ### **Pi Agent**
-
+ 
+  
+ 
 In `~/.pi/agent/mcp.json`:
 
 ```json
@@ -228,9 +272,13 @@ In `~/.pi/agent/mcp.json`:
   }
 }
 ```
-
+ 
+  
+ 
 ### **Hermes**
-
+ 
+  
+ 
 In `~/.hermes/config.yaml`:
 
 ```yaml
@@ -243,9 +291,13 @@ mcp_servers:
       KEILA_URL: https://your-keila-instance.com
       KEILA_API_KEY: your-api-key
 ```
-
+ 
+  
+ 
 ### **OpenAI Codex CLI**
-
+ 
+  
+ 
 **File**: `~/.codex/config.toml` (global) or `.codex/config.toml` (project):
 
 ```toml
@@ -261,7 +313,9 @@ KEILA_API_KEY = "your-api-key"
   
 
 ---
-
+ 
+  
+ 
 ## **Running manually (for testing)**
 
 ```bash
@@ -276,9 +330,13 @@ python src/mcp_server.py --http
   
 
 ---
-
+ 
+  
+ 
 ## **Tools**
-
+ 
+  
+ 
 | Tool | Description |
 |------|-------------|
 | `list_campaigns`       | List all campaigns with optional status/search filter |
@@ -307,9 +365,13 @@ python src/mcp_server.py --http
 | `update_form`          | Update a form |
 | `delete_form`          | Delete a form |
 | `submit_form`          | Submit a signup form on behalf of a contact |
-
+ 
+  
+ 
 ### **Campaigns**
-
+ 
+  
+ 
 #### `list_campaigns`
 
 List all email campaigns with optional filtering.
@@ -318,7 +380,9 @@ List all email campaigns with optional filtering.
 |-------|------|----------|-------------|
 | `status` | string | No | Filter by: draft/scheduled/sent/archived/paused |
 | `q` | string | No | Search by subject (case-insensitive substring) |
-
+ 
+  
+ 
 #### `create_campaign`
 
 Create a new email campaign.
@@ -333,7 +397,9 @@ Create a new email campaign.
 | `segment_id` | string | No | Target segment ID |
 | `data` | object | No | Liquid template variables |
 | `do_not_track` | boolean | No | Disable open/click tracking |
-
+ 
+  
+ 
 #### `get_campaign`
 
 Get a single campaign by ID.
@@ -341,7 +407,9 @@ Get a single campaign by ID.
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Campaign ID |
-
+ 
+  
+ 
 #### `update_campaign`
 
 Update an existing campaign.
@@ -351,7 +419,9 @@ Update an existing campaign.
 | `id` | string | Yes | Campaign ID |
 | `subject` | string | No | New subject line |
 | `preview_text` | string | No | New preview text |
-
+ 
+  
+ 
 #### `delete_campaign`
 
 Delete a campaign.
@@ -359,7 +429,9 @@ Delete a campaign.
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Campaign ID |
-
+ 
+  
+ 
 #### `send_campaign`
 
 Send a campaign immediately.
@@ -368,7 +440,9 @@ Send a campaign immediately.
 |-------|------|----------|-------------|
 | `id` | string | Yes | Campaign ID |
 | `sender_id` | string | No | Override sender identity |
-
+ 
+  
+ 
 #### `schedule_campaign`
 
 Schedule a campaign for later delivery.
@@ -377,9 +451,13 @@ Schedule a campaign for later delivery.
 |-------|------|----------|-------------|
 | `id` | string | Yes | Campaign ID |
 | `scheduled_for` | string | Yes | ISO 8601 datetime (e.g. 2026-06-01T09:00:00Z) |
-
+ 
+  
+ 
 ### **Contacts**
-
+ 
+  
+ 
 #### `create_contact`
 
 Create a new contact.
@@ -392,7 +470,9 @@ Create a new contact.
 | `external_id` | string | No | External system ID |
 | `status` | string | No | Status: active/inactive/bouncing/blocked/spam |
 | `data` | object | No | Custom fields |
-
+ 
+  
+ 
 #### `get_contact`
 
 Get a contact by ID, email, or external ID.
@@ -401,7 +481,9 @@ Get a contact by ID, email, or external ID.
 |-------|------|----------|-------------|
 | `id` | string | Yes | Contact identifier |
 | `id_type` | string | No | Lookup type: id (default)/email/external_id |
-
+ 
+  
+ 
 #### `update_contact`
 
 Update an existing contact.
@@ -415,7 +497,9 @@ Update an existing contact.
 | `external_id` | string | No | New external ID |
 | `data` | object | No | New custom fields |
 | `id_type` | string | No | Lookup type: id (default)/email/external_id |
-
+ 
+  
+ 
 #### `delete_contact`
 
 Delete a contact.
@@ -424,7 +508,9 @@ Delete a contact.
 |-------|------|----------|-------------|
 | `id` | string | Yes | Contact identifier |
 | `id_type` | string | No | Lookup type: id (default)/email/external_id |
-
+ 
+  
+ 
 #### `list_contacts`
 
 List contacts with pagination and optional search.
@@ -434,19 +520,31 @@ List contacts with pagination and optional search.
 | `page` | integer | No | Page number (default: 0) |
 | `page_size` | integer | No | Results per page (default: 50) |
 | `q` | string | No | Search query |
-
+ 
+  
+ 
 ### **Senders**
-
+ 
+  
+ 
 #### `list_senders`
 
 List all sender identities.
 
 No parameters.
-
+ 
+  
+ 
 ### **Contact Data**
-
+ 
+Custom data is a free-form JSON object attached to each contact. Use it to store any extra fields (e.g. `plan`, `score`, `tags`). Fields can be used as merge tags in campaigns via `{{ contact.data.my_field }}` and as segment filters. See [Keila — Segments and Custom Data](https://www.keila.io/segments-and-data/) and [Contacts API docs](https://www.keila.io/docs/contacts/).
+ 
+  
+ 
 #### `update_contact_data`
-
+ 
+  
+ 
 Merge new key/value pairs into a contact's custom data field. Keys not present in `data` are preserved.
 
 | Param | Type | Required | Description |
@@ -454,7 +552,9 @@ Merge new key/value pairs into a contact's custom data field. Keys not present i
 | `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
 | `data` | object | Yes | Key/value pairs to merge |
 | `id_type` | string | No | `id` (default), `email`, or `external_id` |
-
+ 
+  
+ 
 #### `replace_contact_data`
 
 Replace a contact's entire custom data field with the provided dict.
@@ -464,9 +564,13 @@ Replace a contact's entire custom data field with the provided dict.
 | `id` | string | Yes | Contact ID (or email/external_id when `id_type` set) |
 | `data` | object | Yes | New data dict (replaces existing) |
 | `id_type` | string | No | `id` (default), `email`, or `external_id` |
-
+ 
+  
+ 
 ### **Segments**
-
+ 
+  
+ 
 #### `create_segment`
 
 Create a contact segment with a filter.
@@ -475,13 +579,17 @@ Create a contact segment with a filter.
 |-------|------|----------|-------------|
 | `name` | string | Yes | Segment name |
 | `filter` | object | Yes | Keila filter expression |
-
+ 
+  
+ 
 #### `list_segments`
 
 List all segments.
 
 No parameters.
-
+ 
+  
+ 
 #### `get_segment`
 
 Get a segment by ID.
@@ -489,7 +597,9 @@ Get a segment by ID.
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Segment ID |
-
+ 
+  
+ 
 #### `delete_segment`
 
 Delete a segment.
@@ -497,7 +607,9 @@ Delete a segment.
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Segment ID |
-
+ 
+  
+ 
 #### `update_segment`
 
 Update a segment's name and/or filter. At least one of `name` or `filter` must be provided.
@@ -507,15 +619,21 @@ Update a segment's name and/or filter. At least one of `name` or `filter` must b
 | `id` | string | Yes | Segment ID |
 | `name` | string | No | New segment name |
 | `filter` | object | No | New filter expression |
-
+ 
+  
+ 
 ### **Forms**
-
+ 
+  
+ 
 #### `list_forms`
 
 List all subscription forms.
 
 No parameters.
-
+ 
+  
+ 
 #### `get_form`
 
 Get a form by ID.
@@ -523,7 +641,9 @@ Get a form by ID.
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Form ID |
-
+ 
+  
+ 
 #### `create_form`
 
 Create a new subscription form.
@@ -534,7 +654,9 @@ Create a new subscription form.
 | `sender_id` | string | No | Sender identity ID |
 | `fields` | array | No | Form field definitions |
 | `settings` | object | No | Form settings (double opt-in, redirect URLs, etc.) |
-
+ 
+  
+ 
 #### `delete_form`
 
 Delete a form.
@@ -542,7 +664,9 @@ Delete a form.
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Form ID |
-
+ 
+  
+ 
 #### `update_form`
 
 Update an existing signup form.
@@ -554,7 +678,9 @@ Update an existing signup form.
 | `sender_id` | string | No | New sender identity ID |
 | `fields` | array | No | Replacement field definitions |
 | `settings` | object | No | Updated form settings |
-
+ 
+  
+ 
 #### `submit_form`
 
 Submit a signup form on behalf of a contact. Returns the created/updated contact on success, or `{"data": {"double_opt_in_required": true}}` if the form has double opt-in enabled.
@@ -573,6 +699,8 @@ Submit a signup form on behalf of a contact. Returns the created/updated contact
 
 ---
 
+  
+
 ## **Development**
 
 ```bash
@@ -585,6 +713,7 @@ pytest tests/ -v
 <div align="center">
 _______
 
+<br>
 
 © 2026 — [LICENSE AGPL-3.0](LICENSE)
 

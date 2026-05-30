@@ -1,6 +1,6 @@
 # **Keila MCP**
 
-> MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments and forms.
+MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments and forms.
 
   
 
@@ -711,9 +711,6 @@ pytest tests/ -v
   
 
 <div align="center">
-_______
-
-<br>
 
 © 2026 — [LICENSE AGPL-3.0](LICENSE)
 

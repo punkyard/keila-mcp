@@ -883,7 +883,8 @@ def main():
     if "--http" in sys.argv:
         transport = "http"
 
-    logger.info("starting_server", extra={"transport": transport})
+    if transport != "stdio":
+        logger.info("starting_server", extra={"transport": transport})
     app.run(transport=transport)
 
 

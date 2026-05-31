@@ -19,6 +19,21 @@ VALID_STATUSES = {"draft", "scheduled", "sent", "archived", "paused"}
 _client: KeilaClient | None = None
 
 
+def _safe_tool(fn):
+    """Decorator: catch any unhandled exception in a tool and return {"error": ...}."""
+    import functools
+
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            logger.error("tool.unexpected_error", extra={"tool": fn.__name__, "error": str(e)})
+            return {"error": f"Unexpected error: {e}"}
+
+    return wrapper
+
+
 def _validate_env() -> None:
     """Exit with a clear error if required env vars are missing."""
     missing = [v for v in ("KEILA_URL", "KEILA_API_KEY") if not os.environ.get(v)]
@@ -37,6 +52,7 @@ def get_client() -> KeilaClient:
     return _client
 
 
+@_safe_tool
 def list_campaigns(status: str | None = None, q: str | None = None) -> list | dict:
     correlation_id = str(uuid.uuid4())[:8]
 
@@ -95,6 +111,7 @@ def list_campaigns(status: str | None = None, q: str | None = None) -> list | di
         return {"error": str(e)}
 
 
+@_safe_tool
 def create_campaign_tool(
     subject: str,
     body_type: str,
@@ -136,6 +153,7 @@ def create_campaign_tool(
         return {"error": str(e)}
 
 
+@_safe_tool
 def get_campaign_tool(id: str) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -157,6 +175,7 @@ def get_campaign_tool(id: str) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def update_campaign_tool(
     id: str,
     subject: str | None = None,
@@ -191,6 +210,7 @@ def update_campaign_tool(
         return {"error": str(e)}
 
 
+@_safe_tool
 def delete_campaign_tool(id: str) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -219,6 +239,7 @@ def delete_campaign_tool(id: str) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def send_campaign_tool(id: str, sender_id: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -244,6 +265,7 @@ def send_campaign_tool(id: str, sender_id: str | None = None) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def schedule_campaign_tool(id: str, scheduled_for: str, sender_id: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -269,6 +291,7 @@ def schedule_campaign_tool(id: str, scheduled_for: str, sender_id: str | None = 
         return {"error": str(e)}
 
 
+@_safe_tool
 def create_contact_tool(
     email: str,
     first_name: str | None = None,
@@ -299,6 +322,7 @@ def create_contact_tool(
         return {"error": str(e)}
 
 
+@_safe_tool
 def get_contact_tool(id: str, id_type: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -319,6 +343,7 @@ def get_contact_tool(id: str, id_type: str | None = None) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def update_contact_tool(
     id: str,
     email: str | None = None,
@@ -350,6 +375,7 @@ def update_contact_tool(
         return {"error": str(e)}
 
 
+@_safe_tool
 def delete_contact_tool(id: str, id_type: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -370,6 +396,7 @@ def delete_contact_tool(id: str, id_type: str | None = None) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def list_contacts_tool(page: int = 0, page_size: int = 50, q: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -388,6 +415,7 @@ def list_contacts_tool(page: int = 0, page_size: int = 50, q: str | None = None)
         return {"error": str(e)}
 
 
+@_safe_tool
 def list_senders_tool() -> list | dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -406,6 +434,7 @@ def list_senders_tool() -> list | dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def create_segment_tool(name: str, filter: dict) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -424,6 +453,7 @@ def create_segment_tool(name: str, filter: dict) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def list_segments_tool() -> list | dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -442,6 +472,7 @@ def list_segments_tool() -> list | dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def get_segment_tool(id: str) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -462,6 +493,7 @@ def get_segment_tool(id: str) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def delete_segment_tool(id: str) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -482,6 +514,7 @@ def delete_segment_tool(id: str) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def list_forms_tool() -> list | dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -500,6 +533,7 @@ def list_forms_tool() -> list | dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def get_form_tool(id: str) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -520,6 +554,7 @@ def get_form_tool(id: str) -> dict:
         return {"error": str(e)}
 
 
+@_safe_tool
 def create_form_tool(
     name: str,
     sender_id: str | None = None,
@@ -548,6 +583,7 @@ def create_form_tool(
         return {"error": str(e)}
 
 
+@_safe_tool
 def delete_form_tool(id: str) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -569,6 +605,7 @@ def delete_form_tool(id: str) -> dict:
 
 
 
+@_safe_tool
 def update_segment_tool(id: str, name: str | None = None, filter: dict | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -591,6 +628,7 @@ def update_segment_tool(id: str, name: str | None = None, filter: dict | None = 
         return {"error": str(e)}
 
 
+@_safe_tool
 def update_form_tool(
     id: str,
     name: str | None = None,
@@ -617,6 +655,7 @@ def update_form_tool(
         return {"error": str(e)}
 
 
+@_safe_tool
 def update_contact_data_tool(id: str, data: dict, id_type: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -637,6 +676,7 @@ def update_contact_data_tool(id: str, data: dict, id_type: str | None = None) ->
         return {"error": str(e)}
 
 
+@_safe_tool
 def replace_contact_data_tool(id: str, data: dict, id_type: str | None = None) -> dict:
     correlation_id = str(uuid.uuid4())[:8]
     start = time.time()
@@ -657,6 +697,7 @@ def replace_contact_data_tool(id: str, data: dict, id_type: str | None = None) -
         return {"error": str(e)}
 
 
+@_safe_tool
 def submit_form_tool(
     form_id: str,
     email: str,

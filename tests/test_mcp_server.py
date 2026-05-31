@@ -525,3 +525,28 @@ class TestMainEnvVarValidation:
         monkeypatch.setenv("KEILA_API_KEY", "test-key")
         from keila_mcp.mcp_server import _validate_env
         _validate_env()  # should not raise
+
+
+class TestUnexpectedExceptionSafety:
+    """All tools must return {"error": ...} on unexpected exceptions, never crash stdio."""
+
+    def test_list_campaigns_unexpected_exception_returns_error(self):
+        with patch("keila_mcp.mcp_server.get_client") as mock:
+            mock.side_effect = RuntimeError("unexpected boom")
+            from keila_mcp.mcp_server import list_campaigns
+            result = list_campaigns()
+        assert "error" in result
+
+    def test_get_campaign_unexpected_exception_returns_error(self):
+        with patch("keila_mcp.mcp_server.get_client") as mock:
+            mock.side_effect = RuntimeError("unexpected boom")
+            from keila_mcp.mcp_server import get_campaign_tool
+            result = get_campaign_tool(id="mc_1")
+        assert "error" in result
+
+    def test_create_contact_unexpected_exception_returns_error(self):
+        with patch("keila_mcp.mcp_server.get_client") as mock:
+            mock.side_effect = RuntimeError("unexpected boom")
+            from keila_mcp.mcp_server import create_contact_tool
+            result = create_contact_tool(email="x@x.com")
+        assert "error" in result

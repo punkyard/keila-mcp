@@ -38,6 +38,9 @@ class KeilaClient:
         if not api_key:
             raise ValueError("api_key is required")
 
+        if not base_url.startswith(("http://", "https://")):
+            base_url = "https://" + base_url
+
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.timeout = timeout
@@ -96,7 +99,6 @@ class KeilaClient:
         json_body: dict[str, Any] | None = None,
         max_retries: int = 3,
     ) -> dict[str, Any]:
-        last_error: Exception | None = None
         http_fn = self._METHODS[method]
         http_kwargs: dict[str, Any] = {"timeout": self.timeout}
         if params is not None:
@@ -122,9 +124,6 @@ class KeilaClient:
                 raise KeilaApiError(f"Connection error: {e}") from e
             except requests.Timeout as e:
                 raise KeilaApiError(f"Request timed out: {e}") from e
-
-        if last_error:
-            raise last_error
 
         raise KeilaApiError("Max retries exceeded")
 

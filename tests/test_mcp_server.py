@@ -1,4 +1,7 @@
 from unittest.mock import Mock, patch
+import os
+import sys
+import pytest
 
 from keila_mcp.keila_client import KeilaAuthError, KeilaApiError, KeilaNotFoundError, KeilaRateLimitError, KeilaValidationError
 
@@ -494,3 +497,31 @@ class TestSupportingTools:
         result = submit_form_tool(form_id="nfrm_missing", email="jane@example.com")
         assert "error" in result
         assert "Form not found" in result["error"]
+
+
+class TestMainEnvVarValidation:
+    def test_missing_keila_url_exits_with_message(self, monkeypatch, capsys):
+        monkeypatch.delenv("KEILA_URL", raising=False)
+        monkeypatch.setenv("KEILA_API_KEY", "test-key")
+        with pytest.raises(SystemExit) as exc_info:
+            from keila_mcp.mcp_server import _validate_env
+            _validate_env()
+        assert exc_info.value.code != 0
+        captured = capsys.readouterr()
+        assert "KEILA_URL" in captured.err
+
+    def test_missing_keila_api_key_exits_with_message(self, monkeypatch, capsys):
+        monkeypatch.setenv("KEILA_URL", "http://test.local")
+        monkeypatch.delenv("KEILA_API_KEY", raising=False)
+        with pytest.raises(SystemExit) as exc_info:
+            from keila_mcp.mcp_server import _validate_env
+            _validate_env()
+        assert exc_info.value.code != 0
+        captured = capsys.readouterr()
+        assert "KEILA_API_KEY" in captured.err
+
+    def test_both_vars_present_does_not_exit(self, monkeypatch):
+        monkeypatch.setenv("KEILA_URL", "http://test.local")
+        monkeypatch.setenv("KEILA_API_KEY", "test-key")
+        from keila_mcp.mcp_server import _validate_env
+        _validate_env()  # should not raise

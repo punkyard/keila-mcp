@@ -19,6 +19,15 @@ VALID_STATUSES = {"draft", "scheduled", "sent", "archived", "paused"}
 _client: KeilaClient | None = None
 
 
+def _validate_env() -> None:
+    """Exit with a clear error if required env vars are missing."""
+    missing = [v for v in ("KEILA_URL", "KEILA_API_KEY") if not os.environ.get(v)]
+    if missing:
+        for var in missing:
+            print(f"ERROR: required environment variable {var} is not set.", file=sys.stderr)
+        sys.exit(1)
+
+
 def get_client() -> KeilaClient:
     global _client
     if _client is None:
@@ -687,9 +696,10 @@ def submit_form_tool(
 
 
 def main():
+    _validate_env()
     from mcp.server.fastmcp import FastMCP
 
-    app = FastMCP("keila-mcp", description="MCP server for Keila API")
+    app = FastMCP("keila-mcp", instructions="MCP server for Keila API")
 
     @app.tool()
     def list_campaigns_tool(

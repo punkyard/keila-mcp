@@ -1,5 +1,8 @@
 # **Keila MCP**
 
+[![PyPI](https://img.shields.io/pypi/v/keila-mcp)](https://pypi.org/project/keila-mcp/)
+[![Python](https://img.shields.io/pypi/pyversions/keila-mcp)](https://pypi.org/project/keila-mcp/)
+
 MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments and forms.
 
 > [!NOTE]

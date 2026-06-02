@@ -517,7 +517,7 @@ wheels = [
 
 [[package]]
 name = "keila-mcp"
-version = "0.1.3"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "mcp", extra = ["cli"] },

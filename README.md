@@ -70,7 +70,7 @@ mkdir -p ~/.mcp && cd ~/.mcp
 mkdir -p ~/Developer/my-project/.mcp && cd ~/Developer/my-project/.mcp
 
 git clone https://github.com/punkyard/keila-mcp.git keila-mcp
-cd keila-mcp/repo
+cd keila-mcp
 python -m venv .venv
 source .venv/bin/activate
 pip install .
@@ -93,7 +93,7 @@ mkdir %USERPROFILE%\.mcp && cd %USERPROFILE%\.mcp
 mkdir C:\Users\your-username\Developer\my-project\.mcp && cd C:\Users\your-username\Developer\my-project\.mcp
 
 git clone https://github.com/punkyard/keila-mcp.git keila-mcp
-cd keila-mcp\repo
+cd keila-mcp
 python -m venv .venv
 .venv\Scripts\activate
 pip install .
@@ -122,7 +122,7 @@ Every MCP client needs two things: the path to the Python interpreter and two en
 
   
 
-![Keila API Keys](docs/img/keila-create-api-key.png)
+![Keila API Keys](https://raw.githubusercontent.com/punkyard/keila-mcp/main/docs/img/keila-create-api-key.png)
 
   
 
@@ -741,7 +741,7 @@ pytest tests/ -v
 
 <div align="center">
 
-© 2026 — [LICENSE AGPL-3.0](LICENSE)
+© 2026 — [LICENSE AGPL-3.0](https://github.com/punkyard/keila-mcp/blob/main/LICENSE)
 
 made with ⏳ by [punkyard](https://github.com/punkyard)
 

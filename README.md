@@ -1,9 +1,15 @@
 # **Keila MCP**
 
+  
+
 [![PyPI](https://img.shields.io/pypi/v/keila-mcp)](https://pypi.org/project/keila-mcp/)
 [![Python](https://img.shields.io/pypi/pyversions/keila-mcp)](https://pypi.org/project/keila-mcp/)
 
+  
+
 MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-compatible AI assistant full control over your Keila email campaigns, contacts, segments and forms.
+
+  
 
 > [!NOTE]
 > **Migrating from an earlier clone?** The source directory was renamed from `repo/` to `keila-mcp/`. Update any paths in your MCP client config accordingly.
@@ -14,10 +20,138 @@ MCP server for [Keila](https://github.com/pentacent/keila) — gives any MCP-com
  
   
  
-## **Quickstart with uvx**
+## **Two ways to use keila-mcp**
 
-If you have [`uv`](https://docs.astral.sh/uv/) installed, no cloning or virtualenv needed:
+  
 
+| | **Option A — `uvx`** ✅ recommended | **Option B — Local install** |
+|---|---|---|
+| **What it does** | Downloads and runs keila-mcp automatically from PyPI | You clone the repo and manage the install yourself |
+| **Requires** | [`uv`](https://docs.astral.sh/uv/) | Python 3.10+, git |
+| **Updates** | Automatic — always runs the latest version | Manual — `git pull` + `pip install .` |
+| **Best for** | Most users | Offline use, development, contributors |
+
+  
+
+---
+
+  
+
+## **Requirements**
+
+- A running [Keila](https://www.keila.io/docs) instance — [self-host with Docker](https://www.keila.io/docs/self-hosting) or use [Keila Cloud](https://app.keila.io)
+- A Keila API key — Settings → API Keys → Create
+
+  
+
+---
+
+  
+
+## **Option A — uvx (recommended)**
+
+> [!IMPORTANT]
+> You need [`uv`](https://docs.astral.sh/uv/) installed first. If you don't have it:
+> ```bash
+> # macOS / Linux
+> curl -LsSf https://astral.sh/uv/install.sh | sh
+> # Windows
+> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+> ```
+> Then restart your terminal.
+
+No cloning, no virtualenv, no `pip install`. Just add the config to your MCP client — `uvx` downloads and caches keila-mcp automatically on first run.
+
+Skip straight to [**Client Configuration**](#client-configuration) and use the **Option A** config for your client.
+
+  
+
+---
+
+  
+
+## **Option B — Local install**
+
+  
+
+Use this for offline access, to modify the code, or to contribute.
+
+- Python 3.10+, git
+ 
+  
+ 
+### macOS / Linux
+
+  
+
+```bash
+git clone https://github.com/punkyard/keila-mcp.git keila-mcp
+cd keila-mcp
+python -m venv .venv
+source .venv/bin/activate
+pip install .
+pwd
+```
+
+Copy the path printed by `pwd` — you will need it in the **Option B** configs below.
+
+### Windows
+
+  
+
+```bash
+git clone https://github.com/punkyard/keila-mcp.git keila-mcp
+cd keila-mcp
+python -m venv .venv
+.venv\Scripts\activate
+pip install .
+cd
+```
+
+Copy the path printed by `cd` — you will need it in the **Option B** configs below.
+
+  
+
+---
+ 
+  
+ 
+## **Client Configuration**
+
+  
+
+
+Set these environment variables in your MCP client config:
+
+| Variable | Value |
+|---|---|
+| `KEILA_URL` | Your Keila instance URL, e.g. `https://keila.mydomain.com` |
+| `KEILA_API_KEY` | Your Keila API key — Settings → API Keys → Create |
+| `KEILA_MCP_HTTP_PORT` | *(optional)* HTTP port for the MCP server. Default: `3001` |
+
+  
+
+![Keila API Keys](https://raw.githubusercontent.com/punkyard/keila-mcp/main/docs/img/keila-create-api-key.png)
+
+  
+
+Each client below shows **Option A (uvx)** and **Option B (local install)** — pick yours.
+
+  
+
+> [!IMPORTANT]
+> **Option B users:** replace `/path/to/keila-mcp` with the path printed by `pwd` (or `cd` on Windows) from the install step above.
+ 
+  
+ 
+### **Claude Desktop**
+ 
+  
+ 
+**File** (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**File** (Windows): `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Option A — uvx:**
 ```json
 {
   "mcpServers": {
@@ -33,117 +167,13 @@ If you have [`uv`](https://docs.astral.sh/uv/) installed, no cloning or virtuale
 }
 ```
 
-Add this to your MCP client config and it works on first run. Skip to [**Client Configuration**](#client-configuration) for client-specific formats.
-
----
-
-## **Requirements**
-
-- A running [Keila](https://www.keila.io/docs) instance — [self-host with Docker](https://www.keila.io/docs/self-hosting) or use [Keila Cloud](https://app.keila.io)
-- A Keila API key — Settings → API Keys → Create
-- Python 3.10+ on your machine
-
-  
-
----
- 
-  
- 
-## **Installation**
- 
-Choose where to install:
-
-- **Global** — use Keila MCP in any project: install in `~/.mcp/`
-- **Project** — use it only in one project: install in your project folder, e.g. `~/Developer/my-project/.mcp/`
- 
-  
- 
-### **macOS / Linux**
- 
-  
- 
-```bash
-# global
-mkdir -p ~/.mcp && cd ~/.mcp
-
-# or project-specific
-mkdir -p ~/Developer/my-project/.mcp && cd ~/Developer/my-project/.mcp
-
-git clone https://github.com/punkyard/keila-mcp.git keila-mcp
-cd keila-mcp
-python -m venv .venv
-source .venv/bin/activate
-pip install .
-pwd
-```
-
-Copy the path printed by `pwd` — you will paste it into your client config below.
- 
-  
- 
-### **Windows**
- 
-  
- 
-```bash
-# global
-mkdir %USERPROFILE%\.mcp && cd %USERPROFILE%\.mcp
-
-# or project-specific
-mkdir C:\Users\your-username\Developer\my-project\.mcp && cd C:\Users\your-username\Developer\my-project\.mcp
-
-git clone https://github.com/punkyard/keila-mcp.git keila-mcp
-cd keila-mcp
-python -m venv .venv
-.venv\Scripts\activate
-pip install .
-cd
-```
-
-Copy the path printed by `cd` — you will paste it into your client config below.
-
-  
-
----
- 
-  
- 
-## **Client Setup**
- 
-  
- 
-Every MCP client needs two things: the path to the Python interpreter and two environment variables.
-
-| Variable        | Value                                                          |
-|-----------------|----------------------------------------------------------------|
-| `KEILA_URL`     | Your Keila instance URL, e.g. `https://keila.mydomain.com` |
-| `KEILA_API_KEY` | Create a Keila API key per project                             |
-| `KEILA_MCP_HTTP_PORT` | *(optional)* HTTP port for the MCP server. Default: `3001`  |
-
-  
-
-![Keila API Keys](https://raw.githubusercontent.com/punkyard/keila-mcp/main/docs/img/keila-create-api-key.png)
-
-  
-
-> [!IMPORTANT]
-> In all examples below, replace `/path/to/keila-mcp/repo` with the path printed by `pwd` (or `cd` on Windows) at the end of the installation section.
- 
-  
- 
-### **Claude Desktop**
- 
-  
- 
-**File** (macOS): `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**File** (Windows): `%APPDATA%\Claude\claude_desktop_config.json`
-
+**Option B — Local install:**
 ```json
 {
   "mcpServers": {
     "keila": {
-      "command": "/path/to/keila-mcp/keila-mcp/.venv/bin/python",
-      "args": ["/path/to/keila-mcp/keila-mcp/src/mcp_server.py"],
+      "command": "/path/to/keila-mcp/.venv/bin/python",
+      "args": ["-m", "keila_mcp.mcp_server"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "your-api-key"
@@ -161,11 +191,25 @@ Fully quit and relaunch Claude Desktop after saving.
  
   
  
+**Option A — uvx:**
 ```bash
 claude mcp add-json keila '{
   "type": "stdio",
-  "command": "/path/to/keila-mcp/keila-mcp/.venv/bin/python",
-  "args": ["/path/to/keila-mcp/keila-mcp/src/mcp_server.py"],
+  "command": "uvx",
+  "args": ["keila-mcp"],
+  "env": {
+    "KEILA_URL": "https://your-keila-instance.com",
+    "KEILA_API_KEY": "your-api-key"
+  }
+}'
+```
+
+**Option B — Local install:**
+```bash
+claude mcp add-json keila '{
+  "type": "stdio",
+  "command": "/path/to/keila-mcp/.venv/bin/python",
+  "args": ["-m", "keila_mcp.mcp_server"],
   "env": {
     "KEILA_URL": "https://your-keila-instance.com",
     "KEILA_API_KEY": "your-api-key"
@@ -186,12 +230,13 @@ Add `--scope global` to make it available in all projects.
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
 - **OpenClaw**: `~/.openclaw/mcp.json`
 
+**Option A — uvx:**
 ```json
 {
   "mcpServers": {
     "keila": {
-      "command": "/path/to/keila-mcp/keila-mcp/.venv/bin/python",
-      "args": ["/path/to/keila-mcp/keila-mcp/src/mcp_server.py"],
+      "command": "uvx",
+      "args": ["keila-mcp"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "your-api-key"
@@ -200,21 +245,62 @@ Add `--scope global` to make it available in all projects.
   }
 }
 ```
- 
+
+**Option B — Local install:**
+```json
+{
+  "mcpServers": {
+    "keila": {
+      "command": "/path/to/keila-mcp/.venv/bin/python",
+      "args": ["-m", "keila_mcp.mcp_server"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
   
- 
+
 ### **VS Code (GitHub Copilot Agent Mode)**
  
   
  
 Create `.vscode/mcp.json` in your project:
 
+**Option A — uvx:**
 ```json
 {
   "servers": {
     "keila": {
-      "command": "/path/to/keila-mcp/keila-mcp/.venv/bin/python",
-      "args": ["/path/to/keila-mcp/keila-mcp/src/mcp_server.py"],
+      "command": "uvx",
+      "args": ["keila-mcp"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "${input:keilaApiKey}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "keilaApiKey",
+      "type": "promptString",
+      "description": "Keila API Key",
+      "password": true
+    }
+  ]
+}
+```
+
+**Option B — Local install:**
+```json
+{
+  "servers": {
+    "keila": {
+      "command": "/path/to/keila-mcp/.venv/bin/python",
+      "args": ["-m", "keila_mcp.mcp_server"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "${input:keilaApiKey}"
@@ -242,15 +328,36 @@ Requires Copilot Chat in Agent mode. VS Code will prompt for the API key on firs
  
 In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
 
+**Option A — uvx:**
 ```json
 {
   "context_servers": {
     "keila": {
-      "command": "/path/to/keila-mcp/keila-mcp/.venv/bin/python",
-      "args": ["/path/to/keila-mcp/keila-mcp/src/mcp_server.py"],
-      "env": {
-        "KEILA_URL": "https://your-keila-instance.com",
-        "KEILA_API_KEY": "your-api-key"
+      "command": {
+        "path": "uvx",
+        "args": ["keila-mcp"],
+        "env": {
+          "KEILA_URL": "https://your-keila-instance.com",
+          "KEILA_API_KEY": "your-api-key"
+        }
+      }
+    }
+  }
+}
+```
+
+**Option B — Local install:**
+```json
+{
+  "context_servers": {
+    "keila": {
+      "command": {
+        "path": "/path/to/keila-mcp/.venv/bin/python",
+        "args": ["-m", "keila_mcp.mcp_server"],
+        "env": {
+          "KEILA_URL": "https://your-keila-instance.com",
+          "KEILA_API_KEY": "your-api-key"
+        }
       }
     }
   }
@@ -265,12 +372,29 @@ In `~/.config/zed/settings.json` (global) or `.zed/settings.json` (project):
  
 In `~/.config/opencode/opencode.json` (global) or `opencode.json` (project):
 
+**Option A — uvx:**
 ```json
 {
   "mcp": {
     "keila": {
       "type": "local",
-      "command": ["/path/to/keila-mcp/keila-mcp/.venv/bin/python", "/path/to/keila-mcp/keila-mcp/src/mcp_server.py"],
+      "command": ["uvx", "keila-mcp"],
+      "env": {
+        "KEILA_URL": "https://your-keila-instance.com",
+        "KEILA_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+**Option B — Local install:**
+```json
+{
+  "mcp": {
+    "keila": {
+      "type": "local",
+      "command": ["/path/to/keila-mcp/.venv/bin/python", "-m", "keila_mcp.mcp_server"],
       "env": {
         "KEILA_URL": "https://your-keila-instance.com",
         "KEILA_API_KEY": "your-api-key"
@@ -288,11 +412,27 @@ In `~/.config/opencode/opencode.json` (global) or `opencode.json` (project):
  
 In `~/.pi/agent/mcp.json`:
 
+**Option A — uvx:**
 ```json
 {
   "keila": {
-    "command": "/path/to/keila-mcp/keila-mcp/.venv/bin/python",
-    "args": ["/path/to/keila-mcp/keila-mcp/src/mcp_server.py"],
+    "command": "uvx",
+    "args": ["keila-mcp"],
+    "env": {
+      "KEILA_URL": "https://your-keila-instance.com",
+      "KEILA_API_KEY": "your-api-key"
+    },
+    "lifecycle": "on-demand"
+  }
+}
+```
+
+**Option B — Local install:**
+```json
+{
+  "keila": {
+    "command": "/path/to/keila-mcp/.venv/bin/python",
+    "args": ["-m", "keila_mcp.mcp_server"],
     "env": {
       "KEILA_URL": "https://your-keila-instance.com",
       "KEILA_API_KEY": "your-api-key"
@@ -310,12 +450,26 @@ In `~/.pi/agent/mcp.json`:
  
 In `~/.hermes/config.yaml`:
 
+**Option A — uvx:**
 ```yaml
 mcp_servers:
   keila:
-    command: /path/to/keila-mcp/keila-mcp/.venv/bin/python
+    command: uvx
     args:
-      - /path/to/keila-mcp/keila-mcp/src/mcp_server.py
+      - keila-mcp
+    env:
+      KEILA_URL: https://your-keila-instance.com
+      KEILA_API_KEY: your-api-key
+```
+
+**Option B — Local install:**
+```yaml
+mcp_servers:
+  keila:
+    command: /path/to/keila-mcp/.venv/bin/python
+    args:
+      - -m
+      - keila_mcp.mcp_server
     env:
       KEILA_URL: https://your-keila-instance.com
       KEILA_API_KEY: your-api-key
@@ -329,10 +483,22 @@ mcp_servers:
  
 **File**: `~/.codex/config.toml` (global) or `.codex/config.toml` (project):
 
+**Option A — uvx:**
 ```toml
 [mcp_servers.keila]
-command = "/path/to/keila-mcp/keila-mcp/.venv/bin/python"
-args = ["/path/to/keila-mcp/keila-mcp/src/mcp_server.py"]
+command = "uvx"
+args = ["keila-mcp"]
+
+[mcp_servers.keila.env]
+KEILA_URL = "https://your-keila-instance.com"
+KEILA_API_KEY = "your-api-key"
+```
+
+**Option B — Local install:**
+```toml
+[mcp_servers.keila]
+command = "/path/to/keila-mcp/.venv/bin/python"
+args = ["-m", "keila_mcp.mcp_server"]
 
 [mcp_servers.keila.env]
 KEILA_URL = "https://your-keila-instance.com"
@@ -348,11 +514,14 @@ KEILA_API_KEY = "your-api-key"
 ## **Running manually (for testing)**
 
 ```bash
-# stdio mode (default)
-python src/mcp_server.py
+# Option A — uvx
+uvx keila-mcp
 
-# HTTP mode
-python src/mcp_server.py --http
+# Option B — local install, stdio mode (default)
+python -m keila_mcp.mcp_server
+
+# Option B — local install, HTTP mode
+python -m keila_mcp.mcp_server --http
 # optional: export KEILA_MCP_HTTP_PORT=8325
 ```
 
@@ -565,14 +734,14 @@ No parameters.
   
  
 ### **Contact Data**
+
+  
  
 Custom data is a free-form JSON object attached to each contact. Use it to store any extra fields (e.g. `plan`, `score`, `tags`). Fields can be used as merge tags in campaigns via `{{ contact.data.my_field }}` and as segment filters. See [Keila — Segments and Custom Data](https://www.keila.io/segments-and-data/) and [Contacts API docs](https://www.keila.io/docs/contacts/).
  
   
  
 #### `update_contact_data`
- 
-  
  
 Merge new key/value pairs into a contact's custom data field. Keys not present in `data` are preserved.
 
@@ -731,6 +900,8 @@ Submit a signup form on behalf of a contact. Returns the created/updated contact
   
 
 ## **Development**
+
+  
 
 ```bash
 pip install -e ".[dev]"

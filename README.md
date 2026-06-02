@@ -2,8 +2,8 @@
 
   
 
-[![PyPI](https://img.shields.io/pypi/v/keila-mcp)](https://pypi.org/project/keila-mcp/)
-[![Python](https://img.shields.io/pypi/pyversions/keila-mcp)](https://pypi.org/project/keila-mcp/)
+[![PyPI](https://img.shields.io/pypi/v/keila-mcp?v=1)](https://pypi.org/project/keila-mcp/)
+[![Python](https://img.shields.io/pypi/pyversions/keila-mcp?v=1)](https://pypi.org/project/keila-mcp/)
 
   
 

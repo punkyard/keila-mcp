@@ -6,7 +6,6 @@
 [![Python](https://img.shields.io/pypi/pyversions/keila-mcp?v=1)](https://pypi.org/project/keila-mcp/)
 [![License](https://img.shields.io/github/license/punkyard/keila-mcp)](https://github.com/punkyard/keila-mcp/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/punkyard/keila-mcp)](https://github.com/punkyard/keila-mcp/stargazers)
-[![Downloads](https://static.pepy.tech/badge/keila-mcp)](https://pepy.tech/project/keila-mcp)
 
   
 

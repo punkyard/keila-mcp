@@ -45,10 +45,12 @@ class KeilaClient:
         self.api_key = api_key
         self.timeout = timeout
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        })
+        self.session.headers.update(
+            {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            }
+        )
 
     def _build_url(self, path: str) -> str:
         return f"{self.base_url}/api/v1{path}"
@@ -56,7 +58,7 @@ class KeilaClient:
     def _handle_response(self, response: requests.Response) -> dict[str, Any]:
         if response.status_code == 401:
             raise KeilaAuthError(
-                f"Keila API returned 401 Unauthorized. Check your KEILA_API_KEY."
+                "Keila API returned 401 Unauthorized. Check your KEILA_API_KEY."
             )
         if response.status_code == 404:
             raise KeilaNotFoundError(
@@ -65,13 +67,11 @@ class KeilaClient:
         if response.status_code == 422:
             body = response.json()
             detail = body.get("error", body.get("details", "Validation error"))
-            raise KeilaValidationError(
-                f"Keila API returned 422: {detail}"
-            )
+            raise KeilaValidationError(f"Keila API returned 422: {detail}")
         if response.status_code == 429:
             raise KeilaRateLimitError(
-                f"Keila API rate limit exceeded (429). Retry later. "
-                f"Limit: 1000 requests/hour."
+                "Keila API rate limit exceeded (429). Retry later. "
+                "Limit: 1000 requests/hour."
             )
         if response.status_code >= 500:
             raise KeilaApiError(
@@ -112,7 +112,7 @@ class KeilaClient:
                 return self._handle_response(response)
             except KeilaRateLimitError:
                 if attempt < max_retries - 1:
-                    backoff = 2 ** attempt
+                    backoff = 2**attempt
                     logger.warning(
                         "keila_client.retry",
                         extra={"attempt": attempt + 1, "backoff": backoff},
@@ -127,32 +127,42 @@ class KeilaClient:
 
         raise KeilaApiError("Max retries exceeded")
 
-    def _get(
-        self, path: str, params: dict[str, str] | None = None
-    ) -> dict[str, Any]:
+    def _get(self, path: str, params: dict[str, str] | None = None) -> dict[str, Any]:
         url = self._build_url(path)
         return self._request_with_retry(url, params=params, method="GET")
 
     def _post(
-        self, path: str, json_body: dict[str, Any] | None = None,
+        self,
+        path: str,
+        json_body: dict[str, Any] | None = None,
         params: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         url = self._build_url(path)
-        return self._request_with_retry(url, method="POST", json_body=json_body, params=params)
+        return self._request_with_retry(
+            url, method="POST", json_body=json_body, params=params
+        )
 
     def _put(
-        self, path: str, json_body: dict[str, Any] | None = None,
+        self,
+        path: str,
+        json_body: dict[str, Any] | None = None,
         params: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         url = self._build_url(path)
-        return self._request_with_retry(url, method="PUT", json_body=json_body, params=params)
+        return self._request_with_retry(
+            url, method="PUT", json_body=json_body, params=params
+        )
 
     def _patch(
-        self, path: str, json_body: dict[str, Any] | None = None,
+        self,
+        path: str,
+        json_body: dict[str, Any] | None = None,
         params: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         url = self._build_url(path)
-        return self._request_with_retry(url, method="PATCH", json_body=json_body, params=params)
+        return self._request_with_retry(
+            url, method="PATCH", json_body=json_body, params=params
+        )
 
     def _delete(
         self, path: str, params: dict[str, str] | None = None
@@ -315,9 +325,20 @@ class KeilaClient:
         logger.info("keila_client.send_campaign", extra={"id": id})
         return self._post(f"/campaigns/{id}/actions/send", json_body=body or None)
 
-    def schedule_campaign(self, id: str, scheduled_for: str) -> dict[str, Any]:
-        logger.info("keila_client.schedule_campaign", extra={"id": id, "scheduled_for": scheduled_for})
-        data = self._post(f"/campaigns/{id}/actions/schedule", json_body={"data": {"scheduled_for": scheduled_for}})
+    def schedule_campaign(
+        self,
+        id: str,
+        scheduled_for: str,
+        sender_id: str | None = None,
+    ) -> dict[str, Any]:
+        logger.info(
+            "keila_client.schedule_campaign",
+            extra={"id": id, "scheduled_for": scheduled_for, "sender_id": sender_id},
+        )
+        body: dict[str, Any] = {"scheduled_for": scheduled_for}
+        if sender_id is not None:
+            body["sender_id"] = sender_id
+        data = self._post(f"/campaigns/{id}/actions/schedule", json_body={"data": body})
         return self._unwrap_response(data)
 
     # Keys that the Keila API rejects on POST /forms but accepts on PATCH /forms/:id
@@ -392,7 +413,6 @@ class KeilaClient:
         data = self._delete(f"/forms/{id}")
         return self._unwrap_response(data)
 
-
     def create_contact(
         self,
         email: str,
@@ -453,7 +473,9 @@ class KeilaClient:
             params["id_type"] = id_type
 
         logger.info("keila_client.update_contact", extra={"id": id})
-        resp = self._put(f"/contacts/{id}", json_body={"data": body}, params=params or None)
+        resp = self._put(
+            f"/contacts/{id}", json_body={"data": body}, params=params or None
+        )
         return self._unwrap_response(resp)
 
     def delete_contact(self, id: str, id_type: str | None = None) -> dict[str, Any]:
@@ -469,7 +491,10 @@ class KeilaClient:
     ) -> dict[str, Any]:
         # Keila API /contacts rejects any extra query params with 400 "Unexpected field".
         # Fetch all contacts, then apply filter and pagination client-side.
-        logger.info("keila_client.list_contacts", extra={"page": page, "page_size": page_size, "q": q})
+        logger.info(
+            "keila_client.list_contacts",
+            extra={"page": page, "page_size": page_size, "q": q},
+        )
         raw = self._get("/contacts")
         contacts: list[dict] = raw.get("data", [])
 
@@ -477,7 +502,8 @@ class KeilaClient:
         if q:
             q_lower = q.lower()
             contacts = [
-                c for c in contacts
+                c
+                for c in contacts
                 if q_lower in (c.get("email") or "").lower()
                 or q_lower in (c.get("first_name") or "").lower()
                 or q_lower in (c.get("last_name") or "").lower()
@@ -491,6 +517,7 @@ class KeilaClient:
         page_data = contacts[start:end]
 
         import math
+
         page_count = math.ceil(total_count / page_size) if page_size > 0 else 0
 
         return {
@@ -548,7 +575,9 @@ class KeilaClient:
     ) -> dict[str, Any]:
         params = {"id_type": id_type} if id_type else None
         logger.info("keila_client.update_contact_data", extra={"id": id})
-        resp = self._patch(f"/contacts/{id}/data", json_body={"data": data}, params=params)
+        resp = self._patch(
+            f"/contacts/{id}/data", json_body={"data": data}, params=params
+        )
         return self._unwrap_response(resp)
 
     def replace_contact_data(
@@ -556,7 +585,9 @@ class KeilaClient:
     ) -> dict[str, Any]:
         params = {"id_type": id_type} if id_type else None
         logger.info("keila_client.replace_contact_data", extra={"id": id})
-        resp = self._post(f"/contacts/{id}/data", json_body={"data": data}, params=params)
+        resp = self._post(
+            f"/contacts/{id}/data", json_body={"data": data}, params=params
+        )
         return self._unwrap_response(resp)
 
     def list_forms(self) -> list[dict[str, Any]]:
@@ -590,5 +621,7 @@ class KeilaClient:
             body["status"] = status
         if data is not None:
             body["data"] = data
-        logger.info("keila_client.submit_form", extra={"form_id": form_id, "email": email})
+        logger.info(
+            "keila_client.submit_form", extra={"form_id": form_id, "email": email}
+        )
         return self._post(f"/forms/{form_id}/actions/submit", json_body={"data": body})
